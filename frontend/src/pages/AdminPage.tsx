@@ -88,7 +88,7 @@ export function AdminPage() {
   };
 
   const handleEditPost = (postId: string) => {
-    navigate(`/write/${postId}`);
+    navigate(`/edit-post/${postId}`);
   };
 
   const formatDate = (dateString: string) => {
