@@ -37,7 +37,6 @@ export function UserManagementPage() {
   const getAssignableRoles = () => {
     if (currentUser?.role === 'super_admin') {
       return [
-        { value: 'super_admin', label: '超级管理员' },
         { value: 'admin', label: '管理员' },
         { value: 'author', label: '作者' },
         { value: 'contributor', label: '投稿者' },
