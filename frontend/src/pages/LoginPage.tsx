@@ -74,9 +74,12 @@ export function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert variant={emailVerified === false ? "default" : "destructive"}>
+              <Alert
+                variant={emailVerified === false ? "default" : "destructive"}
+                className="mb-4"
+              >
                 <AlertDescription className="space-y-2">
-                  <p>{error}</p>
+                  <p className="font-medium">{error}</p>
                   {emailVerified === false && (
                     <Button
                       type="button"

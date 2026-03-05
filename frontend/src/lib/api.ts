@@ -36,10 +36,16 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // 未授权，清除token
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // 检查是否是认证相关接口（登录、注册等），这些接口的401错误不应该自动跳转
+      const isAuthEndpoint = error.config?.url?.includes('/auth/') ||
+                           error.config?.url?.includes('/verify-email');
+      
+      // 只有非认证接口的401错误才自动跳转到登录页
+      if (!isAuthEndpoint) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
