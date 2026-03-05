@@ -69,8 +69,10 @@ func Register(c *gin.Context) {
 				log.Printf("发送验证邮件失败: %v", err)
 			} else {
 				c.JSON(http.StatusCreated, gin.H{
-					"message": "注册成功，请检查您的邮箱完成验证",
-					"user":    newUser,
+					"message":               "注册成功！请先验证您的邮箱地址，然后才能登录。请检查您的收件箱并点击验证链接。",
+					"user":                  newUser,
+					"email_verified":        false,
+					"requires_verification": true,
 				})
 				return
 			}
@@ -78,7 +80,9 @@ func Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "注册成功",
-		"user":    newUser,
+		"message":               "注册成功",
+		"user":                  newUser,
+		"email_verified":        newUser.EmailVerified,
+		"requires_verification": false,
 	})
 }

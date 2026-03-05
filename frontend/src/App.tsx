@@ -14,6 +14,7 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { ModerationPage } from '@/pages/ModerationPage';
 import { UserManagementPage } from '@/pages/UserManagementPage';
 import { SMTPSettingsPage } from '@/pages/SMTPSettingsPage';
+import { VerifyEmailPage } from '@/pages/VerifyEmailPage';
 import { Toaster } from '@/components/ui/sonner';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/post/:id" element={<PostDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             {/* 需要登录的路由 */}
             <Route

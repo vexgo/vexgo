@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { authApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
 
   // 获取重定向地址
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
@@ -30,7 +32,31 @@ export function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || '登录失败，请检查邮箱和密码');
+      const errorMessage = err.response?.data?.message || '登录失败，请检查邮箱和密码';
+      setError(errorMessage);
+      
+      // 如果是因为邮箱未验证，保存邮箱状态以便显示重新发送链接
+      if (err.response?.data?.email_verified === false) {
+        setEmailVerified(false);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('请先输入邮箱地址');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await authApi.resendVerificationEmail();
+      setError('');
+      alert('验证邮件已重新发送，请检查您的邮箱');
+    } catch (err: any) {
+      setError(err.response?.data?.message || '重新发送失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -48,8 +74,23 @@ export function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+              <Alert variant={emailVerified === false ? "default" : "destructive"}>
+                <AlertDescription className="space-y-2">
+                  <p>{error}</p>
+                  {emailVerified === false && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResendVerification}
+                      disabled={loading}
+                      className="mt-2"
+                    >
+                      <ArrowLeft className="w-3 h-3 mr-2" />
+                      重新发送验证邮件
+                    </Button>
+                  )}
+                </AlertDescription>
               </Alert>
             )}
 

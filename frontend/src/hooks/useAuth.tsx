@@ -49,18 +49,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await authApi.login({ email, password });
     const { user, token } = response.data;
     
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+    }
   };
 
   const register = async (username: string, email: string, password: string) => {
     const response = await authApi.register({ username, email, password });
-    const { user, token } = response.data;
+    const { user, token, requires_verification, email_verified } = response.data;
     
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
+    // 如果 SMTP 启用且需要验证，则不自动登录，只保存用户信息到状态（但不设置 token）
+    if (requires_verification && !email_verified) {
+      setUser(user);
+      // 抛出特定错误，让前端页面可以显示验证提示
+      const error = new Error(response.data.message || '请先验证您的邮箱地址');
+      (error as any).requiresVerification = true;
+      (error as any).email = email;
+      throw error;
+    }
+    
+    // 正常登录（SMTP 未启用或已验证）
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+    } else {
+      setUser(user);
+    }
   };
 
   const logout = () => {

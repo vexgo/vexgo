@@ -99,7 +99,9 @@ export interface ApiResponse<T> {
 export interface AuthResponse {
   message: string;
   user: User;
-  token: string;
+  token?: string; // 注册时如果需要邮箱验证，可能不返回 token
+  email_verified?: boolean;
+  requires_verification?: boolean;
 }
 
 // 文章列表响应

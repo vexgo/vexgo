@@ -8,6 +8,7 @@ import (
 
 	"blog-system/backend/config"
 	"blog-system/backend/model"
+	"blog-system/backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -35,6 +36,17 @@ func Login(c *gin.Context) {
 	// 使用 bcrypt 比对哈希密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "邮箱或密码错误"})
+		return
+	}
+
+	// 检查是否启用了 SMTP，如果启用则检查邮箱验证状态
+	mailer := utils.NewMailer(db)
+	enabled, err := mailer.IsEmailEnabled()
+	if err == nil && enabled && !user.EmailVerified {
+		c.JSON(http.StatusForbidden, gin.H{
+			"message":        "请先验证您的邮箱地址。请检查您的收件箱并点击验证链接，或请求重新发送验证邮件。",
+			"email_verified": false,
+		})
 		return
 	}
 

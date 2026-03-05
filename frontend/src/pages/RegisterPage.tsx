@@ -43,9 +43,15 @@ export function RegisterPage() {
 
     try {
       await register(username, email, password);
+      // 注册成功且不需要验证，跳转到首页
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || '注册失败，请重试');
+      // 如果需要邮箱验证，显示提示信息但不跳转
+      if (err.requiresVerification) {
+        setError(err.message || '请先验证您的邮箱地址才能登录');
+      } else {
+        setError(err.response?.data?.message || '注册失败，请重试');
+      }
     } finally {
       setLoading(false);
     }

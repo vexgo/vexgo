@@ -66,7 +66,10 @@ export const authApi = {
     api.get<{ email_verified: boolean; email: string }>('/auth/verification-status'),
   
   resendVerificationEmail: () =>
-    api.post<{ message: string }>('/auth/resend-verification')
+    api.post<{ message: string }>('/auth/resend-verification'),
+
+  verifyEmail: (token: string) =>
+    api.get<{ message: string }>(`/verify-email?token=${token}`)
 };
 
 // 文章相关API

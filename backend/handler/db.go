@@ -3,6 +3,7 @@ package handler
 import (
 	"blog-system/backend/model"
 	"log"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -41,7 +42,15 @@ func InitDB() {
 			if err != nil {
 				log.Printf("failed to hash default admin password: %v", err)
 			} else {
-				u = model.User{Username: "admin", Email: "admin@example.com", Password: string(pwHash), Role: "super_admin"}
+				u = model.User{
+					Username:          "admin",
+					Email:             "admin@example.com",
+					Password:          string(pwHash),
+					Role:              "super_admin",
+					EmailVerified:     true,
+					VerificationToken: "",
+					TokenExpiresAt:    time.Time{},
+				}
 				if err := db.Create(&u).Error; err != nil {
 					log.Printf("failed to create default admin: %v", err)
 				}
