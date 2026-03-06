@@ -176,8 +176,8 @@ export function PostDetailPage() {
     });
   };
 
-  const canEditPost = user && post && (user.id === post.authorId || user.role === 'admin');
-  const canDeletePost = user && post && (user.id === post.authorId || user.role === 'admin');
+  const canEditPost = user && post && (user.id === post.authorId || user.role === 'admin' || user.role === 'super_admin');
+  const canDeletePost = user && post && (user.id === post.authorId || user.role === 'admin' || user.role === 'super_admin');
 
   if (loading) {
     return (

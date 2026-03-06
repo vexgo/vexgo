@@ -32,6 +32,7 @@ export function AdminPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDesc, setNewCategoryDesc] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview'|'posts'|'drafts'|'categories'>('overview');
 
   useEffect(() => {
     // 检查是否为管理员或超级管理员
@@ -83,6 +84,8 @@ export function AdminPage() {
   const handleDeletePost = async (postId: string) => {
     try {
       await postsApi.deletePost(postId);
+      // 保持在文章管理页，刷新数据
+      setActiveTab('posts');
       loadData();
     } catch (error) {
       console.error('删除文章失败:', error);
@@ -226,7 +229,7 @@ export function AdminPage() {
       </div>
 
       {/* 管理标签页 */}
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-4 max-w-md">
           <TabsTrigger value="overview">概览</TabsTrigger>
           <TabsTrigger value="posts">文章管理</TabsTrigger>
