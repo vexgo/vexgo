@@ -7,6 +7,7 @@ import (
 	"blog-system/backend/model"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // GetUserList 获取用户列表
@@ -61,15 +62,36 @@ func UpdateUserRole(c *gin.Context) {
 		return
 	}
 
-	currentUser := currentUserInterface.(model.User)
+	// 将用户信息从map转换为model.User
+	userMap, ok := currentUserInterface.(map[string]interface{})
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息格式错误"})
+		return
+	}
+
+	currentUser := model.User{
+		ID:       userMap["id"].(uint),
+		Username: userMap["username"].(string),
+		Role:     userMap["role"].(string),
+	}
 
 	// 获取要更新的用户ID
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的用户ID"})
+		return
+	}
+
 	var user model.User
 
 	// 查找目标用户
-	if err := db.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+	if err := db.First(&user, uint(id)).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询用户失败"})
 		return
 	}
 
@@ -110,25 +132,31 @@ func UpdateUserRole(c *gin.Context) {
 	}
 
 	// 权限检查
-	// 超级管理员可以设置任何角色
-	// 管理员只能将用户角色设置为作者或投稿者
+	// 超级管理员可以设置任何角色（包括其他用户成为超级管理员）
+	// 但不能降级自己的超级管理员权限
 	if currentUser.Role == model.RoleSuperAdmin {
-		// 超级管理员可以设置任何角色
-		user.Role = req.Role
-	} else if currentUser.Role == model.RoleAdmin {
-		// 管理员只能将用户角色设置为作者或投稿者
-		if req.Role != model.RoleAuthor && req.Role != model.RoleContributor {
-			c.JSON(http.StatusForbidden, gin.H{"error": "管理员只能将用户角色设置为作者或投稿者"})
+		// 如果当前用户是超级管理员，可以设置任何角色
+		// 注意：不允许超级管理员将自己的角色降级
+		if user.ID == currentUser.ID && req.Role != model.RoleSuperAdmin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "超级管理员不能修改自己的角色"})
 			return
 		}
 		user.Role = req.Role
+	} else if currentUser.Role == model.RoleAdmin {
+		// 管理员只能将用户角色设置为作者、投稿者或访客（不能设置为管理员或超级管理员）
+		if req.Role == model.RoleAuthor || req.Role == model.RoleContributor || req.Role == model.RoleGuest {
+			user.Role = req.Role
+		} else {
+			c.JSON(http.StatusForbidden, gin.H{"error": "管理员只能将用户角色设置为作者、投稿者或访客"})
+			return
+		}
 	} else {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权限修改用户角色"})
 		return
 	}
 
 	// 保存更新
-	if err := db.Save(&user).Error; err != nil {
+	if err := db.Model(&user).Select("Role").Updates(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新用户角色失败"})
 		return
 	}
