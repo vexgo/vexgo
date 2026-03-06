@@ -303,7 +303,7 @@ export function PostDetailPage() {
           <img
             src={post.coverImage}
             alt={post.title}
-            className="w-full max-h-[400px] object-cover"
+            className="w-full max-h-[400px] object-fill"
           />
         </div>
       )}

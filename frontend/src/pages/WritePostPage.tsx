@@ -96,7 +96,55 @@ export function WritePostPage() {
 
     setUploadingImage(true);
     try {
-      const response = await uploadApi.uploadFile(file);
+      // 按比例压缩图片到封面尺寸上限，保持宽高比
+      // 生成固定尺寸的封面图，保持原图完整可见：缩放原图至目标尺寸内并居中，周围填充白色背景（letterbox）
+      const resizeImageFile = (file: File, targetWidth = 1200, targetHeight = 630, quality = 0.85) => {
+        return new Promise<File>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            // 强制拉伸原图到目标尺寸（允许不按比例缩放），以便在封面区域完整显示
+            const drawW = targetWidth;
+            const drawH = targetHeight;
+
+            // 创建目标画布，填充白色背景以避免透明区域在部分浏览器显示异常
+            const canvas = document.createElement('canvas');
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('无法获取 canvas 上下文'));
+              return;
+            }
+            // 背景色（可改为透明或其它颜色）
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
+            // 直接拉伸绘制到画布上，填满目标尺寸
+            ctx.drawImage(img, 0, 0, drawW, drawH);
+
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error('压缩失败'));
+                return;
+              }
+              const newFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+              resolve(newFile);
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = (err) => reject(err);
+          img.src = URL.createObjectURL(file);
+        });
+      };
+
+      let uploadFile = file;
+      try {
+        uploadFile = await resizeImageFile(file);
+      } catch (err) {
+        // 如果压缩失败，回退使用原始文件
+        console.warn('图片压缩失败，使用原始文件上传', err);
+        uploadFile = file;
+      }
+
+      const response = await uploadApi.uploadFile(uploadFile);
       setCoverImage(response.data.file!.url);
     } catch (error) {
       console.error('上传封面图失败:', error);
@@ -214,7 +262,7 @@ export function WritePostPage() {
                 <img
                   src={coverImage}
                   alt="封面"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="w-full h-48 object-fill rounded-lg"
                 />
                 <Button
                   variant="destructive"
