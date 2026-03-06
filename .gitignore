@@ -4,13 +4,10 @@
 frontend/node_modules
 frontend/dist
 backend/blog.exe
+backend/blog-system
 backend/blog.db
 
 .DS_Store
 backend/.DS_Store
 frontend/.DS_Store
 backend/uploads/.DS_Store
-
-
-
-
