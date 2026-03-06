@@ -6,6 +6,7 @@ interface SliderCaptchaProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (captchaData: { id: string; token: string; x: number }) => void;
+  onVerify?: () => void;
 }
 
 export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps) {
@@ -22,6 +23,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(0);
+  const canClose = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
@@ -205,8 +207,14 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={() => {
+              if (canClose) {
+                onClose();
+              }
+            }}
+            disabled={!canClose}
             className="h-8 w-8 p-0"
+            title={canClose ? "关闭" : "请先完成验证"}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -222,6 +230,12 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-600 flex items-center">
             <CheckCircle className="h-4 w-4 mr-2" />
             验证成功
+          </div>
+        )}
+
+        {!isVerified && error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+            {error}
           </div>
         )}
 
@@ -289,7 +303,11 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
 
             {/* 提示文字 */}
             <div className="text-center text-sm text-gray-600">
-              {isVerified ? '验证成功' : '向右拖动滑块完成验证'}
+              {isVerified ? (
+                <span className="text-green-600 font-medium">验证成功，请点击右上角关闭</span>
+              ) : (
+                '向右拖动滑块完成验证'
+              )}
             </div>
 
             {/* 刷新按钮 */}

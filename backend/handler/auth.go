@@ -80,11 +80,35 @@ func Login(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "请完成滑块验证"})
 			return
 		}
-		_, err := verifyCaptcha(req.CaptchaID, req.CaptchaToken, req.CaptchaX, true)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// 查询验证码
+		var captcha model.Captcha
+		if err := db.Where("id = ? AND token = ?", req.CaptchaID, req.CaptchaToken).First(&captcha).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "验证码不存在或已过期"})
 			return
 		}
+
+		// 检查是否过期
+		if time.Now().After(captcha.ExpiresAt) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "验证码已过期"})
+			return
+		}
+
+		// 验证位置（允许一定误差范围）
+		tolerance := 5
+		if math.Abs(float64(req.CaptchaX-captcha.X)) > float64(tolerance) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "验证失败，请重试"})
+			return
+		}
+
+		// 如果验证码还未使用，则标记为已使用
+		if !captcha.Used {
+			captcha.Used = true
+			if err := db.Save(&captcha).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "验证码验证失败"})
+				return
+			}
+		}
+		// 如果验证码已使用，说明已经预验证成功，直接通过
 	}
 
 	var user model.User
