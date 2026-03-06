@@ -139,7 +139,7 @@ func GenerateCaptcha(c *gin.Context) {
 	})
 }
 
-// VerifyCaptcha 验证滑动拼图
+// VerifyCaptcha 验证滑动拼图并标记为已使用（预验证）
 func VerifyCaptcha(c *gin.Context) {
 	var req struct {
 		ID    string `json:"id" binding:"required"`
@@ -178,9 +178,15 @@ func VerifyCaptcha(c *gin.Context) {
 		return
 	}
 
-	// 不在这里标记为已使用，而是在登录时标记
+	// 标记为已使用
+	captcha.Used = true
+	if err := db.Save(&captcha).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "验证码验证失败"})
+		return
+	}
+
 	// 返回验证成功
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "验证成功"})
 }
 
 // 辅助函数

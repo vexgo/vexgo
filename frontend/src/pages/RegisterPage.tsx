@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SliderCaptcha } from '@/components/ui/slider-captcha';
-import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ export function RegisterPage() {
   const [captchaData, setCaptchaData] = useState<{ id: string; token: string; x: number } | null>(null);
   const [isCaptchaModalOpen, setIsCaptchaModalOpen] = useState(false);
   const [captchaEnabled, setCaptchaEnabled] = useState(false);
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
 
   useEffect(() => {
     loadCaptchaSettings();
@@ -41,27 +42,59 @@ export function RegisterPage() {
   };
 
   // 验证码验证成功回调
-  const handleCaptchaSuccess = (data: { id: string; token: string; x: number }) => {
+  const handleCaptchaSuccess = async (data: { id: string; token: string; x: number }) => {
     setCaptchaData(data);
-    performRegister();
+    
+    // 调用预验证接口，标记验证码为已使用
+    try {
+      await fetch('/api/captcha/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: data.id,
+          token: data.token,
+          x: data.x,
+        }),
+      });
+    } catch (error) {
+      console.error('预验证失败:', error);
+      // 即使预验证失败，也保存数据，让用户尝试注册
+    }
+    
+    setIsCaptchaVerified(true);
+    // 不自动执行注册，等待用户点击注册按钮
+  };
+
+  // 重置验证码状态
+  const resetCaptcha = () => {
+    setCaptchaData(null);
+    setIsCaptchaVerified(false);
   };
 
   const performRegister = async () => {
     setLoading(true);
     try {
-      if (captchaEnabled && captchaData) {
+      if (captchaEnabled) {
+        if (!captchaData) {
+          alert('请先完成滑块验证');
+          setIsCaptchaModalOpen(true);
+          return;
+        }
         await register(username, email, password, captchaData);
       } else {
         await register(username, email, password);
       }
       setIsCaptchaModalOpen(false);
+      resetCaptcha();
       navigate('/');
-    } catch (err: any) {
+    } catch (err) {
       // 邮箱验证等后端错误仍可弹窗提示
-      const msg = (err && typeof err === 'object') ?
-        (err.response?.data?.message || err.message) : '';
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = error.response?.data?.message || error.message || '';
       alert(msg || '注册失败，请重试');
-      setCaptchaData(null);
+      // 注册失败后不重置验证码状态，允许用户重试
     } finally {
       setLoading(false);
     }
@@ -91,14 +124,16 @@ export function RegisterPage() {
       hasError = true;
     }
     if (hasError) return;
+    
+    // 如果启用了滑块验证，检查是否已完成验证
     if (captchaEnabled) {
-      if (captchaData) {
-        performRegister();
+      if (!isCaptchaVerified || !captchaData) {
+        alert('请先完成滑块验证');
+        setIsCaptchaModalOpen(true);
         return;
       }
-      setIsCaptchaModalOpen(true);
-      return;
     }
+    
     performRegister();
   };
 
@@ -184,10 +219,57 @@ export function RegisterPage() {
               {confirmPasswordError && <div className="text-red-500 text-sm mt-1">{confirmPasswordError}</div>}
             </div>
 
+            {/* 滑块验证区域 */}
+            {captchaEnabled && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="text-sm font-medium">安全验证</Label>
+                  {isCaptchaVerified && (
+                    <span className="text-xs text-green-600 flex items-center">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      已验证
+                    </span>
+                  )}
+                </div>
+                <div className="border rounded-lg p-3 bg-gray-50">
+                  {isCaptchaVerified ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-sm text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        验证已完成
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetCaptcha}
+                        className="text-xs h-7"
+                      >
+                        重新验证
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">请完成滑块验证</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsCaptchaModalOpen(true)}
+                        className="text-xs h-7"
+                      >
+                        去验证
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full mt-4"
-              disabled={loading}
+              disabled={loading || (captchaEnabled && !isCaptchaVerified)}
             >
               {loading ? (
                 <>
@@ -212,7 +294,12 @@ export function RegisterPage() {
       {/* 验证码弹窗 */}
       <SliderCaptcha
         isOpen={isCaptchaModalOpen}
-        onClose={() => setIsCaptchaModalOpen(false)}
+        onClose={() => {
+          // 只有在验证成功后才允许关闭，或者用户手动关闭
+          if (isCaptchaVerified) {
+            setIsCaptchaModalOpen(false);
+          }
+        }}
         onSuccess={handleCaptchaSuccess}
       />
     </div>
