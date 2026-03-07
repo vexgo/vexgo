@@ -13,6 +13,6 @@ db_type: "mysql"  # Options: "sqlite" or "mysql"
 # When db_type is "mysql", configure the following parameters
 db_host: "127.0.0.1"
 db_port: 3306
-db_user: "myapp_user"
+db_user: "vexgo_user"
 db_password: "test"
-db_name: "myapp_db"
+db_name: "vexgo_db"
