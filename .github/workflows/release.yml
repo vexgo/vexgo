@@ -1,0 +1,119 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Frontend ──────────────────────────────────────────────
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: pnpm run build
+
+      # ── Backend ───────────────────────────────────────────────
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Build backend (Linux amd64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-linux-amd64 .
+
+      - name: Build backend (Linux arm64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-linux-arm64 .
+
+      - name: Build backend (macOS amd64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-darwin-amd64 .
+
+      - name: Build backend (macOS arm64 / Apple Silicon)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-darwin-arm64 .
+
+      - name: Build backend (Windows amd64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-windows-amd64.exe .
+
+      - name: Build backend (Windows arm64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-windows-arm64.exe .
+      
+      - name: Build backend (FreeBSD amd64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=freebsd GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-freebsd-amd64 .
+
+      - name: Build backend (FreeBSD arm64)
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=freebsd GOARCH=arm64 \
+            go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o vexgo-freebsd-arm64 .
+
+
+      # ── Release ───────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true 
+          files: |
+            backend/vexgo-linux-amd64
+            backend/vexgo-linux-arm64
+            backend/vexgo-darwin-amd64
+            backend/vexgo-darwin-arm64
+            backend/vexgo-windows-amd64.exe
+            backend/vexgo-windows-arm64.exe
+            backend/vexgo-freebsd-amd64
+            backend/vexgo-freebsd-arm64
