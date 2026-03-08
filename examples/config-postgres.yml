@@ -7,6 +7,11 @@ port: 3001
 # Data directory (for storing uploaded media files, not used for PostgreSQL)
 data: "./data"
 
+# JWT secret key for signing tokens
+# IMPORTANT: Generate a secure random string for production!
+# You can generate one with: openssl rand -base64 32
+jwt_secret: "your-secret-key-change-this-in-production"
+
 # Database configuration
 db_type: "postgres"  # Options: "sqlite", "mysql", or "postgres"
 

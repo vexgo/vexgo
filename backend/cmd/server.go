@@ -10,9 +10,10 @@ import (
 
 // Config holds the server configuration from command line arguments and/or config file
 type Config struct {
-	Addr    string // Address to listen on (e.g., "0.0.0.0" or "127.0.0.1")
-	Port    int    // Port to listen on
-	DataDir string // Data directory for storing sqlite database and media files
+	Addr      string // Address to listen on (e.g., "0.0.0.0" or "127.0.0.1")
+	Port      int    // Port to listen on
+	DataDir   string // Data directory for storing sqlite database and media files
+	JWTSecret string `yaml:"jwt_secret"` // JWT secret key for signing tokens
 
 	// Database configuration
 	DBType     string `yaml:"db_type"`     // Database type: "sqlite", "mysql", or "postgres"
@@ -36,9 +37,10 @@ func ParseFlags() *Config {
 
 	// Default configuration with environment variable fallback
 	cfg := &Config{
-		Addr:    getEnvOrDefault("ADDR", *addr, "0.0.0.0"),
-		Port:    getIntEnvOrDefault("PORT", *port, 3001),
-		DataDir: getEnvOrDefault("DATA_DIR", *dataDir, "./data"),
+		Addr:      getEnvOrDefault("ADDR", *addr, "0.0.0.0"),
+		Port:      getIntEnvOrDefault("PORT", *port, 3001),
+		DataDir:   getEnvOrDefault("DATA_DIR", *dataDir, "./data"),
+		JWTSecret: getEnvOrDefault("JWT_SECRET", "", ""),
 	}
 
 	// If config file is specified, load it (overrides env and defaults, but not command line flags)
@@ -84,6 +86,13 @@ func getIntEnvOrDefault(key string, value, defaultValue int) int {
 // applyEnvOverrides applies environment variable overrides for database configuration
 // Only applies if the config field is empty (not set by config file or command line)
 func applyEnvOverrides(cfg *Config) {
+	// JWT Secret
+	if cfg.JWTSecret == "" {
+		if env := os.Getenv("JWT_SECRET"); env != "" {
+			cfg.JWTSecret = env
+		}
+	}
+
 	// Database type
 	if cfg.DBType == "" {
 		if env := os.Getenv("DB_TYPE"); env != "" {
@@ -164,6 +173,9 @@ func loadConfigFile(filename string, cfg *Config) error {
 		if temp.DataDir != "" {
 			cfg.DataDir = temp.DataDir
 		}
+	}
+	if cfg.JWTSecret == "" {
+		cfg.JWTSecret = temp.JWTSecret
 	}
 	if cfg.DBType == "" {
 		cfg.DBType = temp.DBType
