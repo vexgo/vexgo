@@ -7,8 +7,13 @@ port: 3001
 # Data directory (for storing SQLite database and uploaded media files)
 data: "./data"
 
+# JWT secret key for signing tokens
+# IMPORTANT: Generate a secure random string for production!
+# You can generate one with: openssl rand -base64 32
+jwt_secret: "your-secret-key-change-this-in-production"
+
 # Database configuration
-db_type: "sqlite"  # Options: "sqlite" or "mysql"
+db_type: "sqlite"  # Options: "sqlite", "mysql", or "postgres"
 
 # When db_type is "mysql", configure the following parameters
 # db_host: "127.0.0.1"
@@ -16,3 +21,11 @@ db_type: "sqlite"  # Options: "sqlite" or "mysql"
 # db_user: "your_username"
 # db_password: "your_password"
 # db_name: "vexgo"
+
+# When db_type is "postgres", configure the following parameters
+# db_host: "127.0.0.1"
+# db_port: 5432
+# db_user: "your_username"
+# db_password: "your_password"
+# db_name: "vexgo"
+# db_ssl_mode: "disable"  # Options: "disable", "require", "verify-ca", "verify-full"

@@ -24,8 +24,13 @@ var JWTSecret []byte
 var FrontendURL string
 
 // Init loads config values from environment and validates them.
-func Init() {
-	s := os.Getenv("JWT_SECRET")
+// If jwtSecret is provided, it will be used instead of environment variable.
+func Init(jwtSecret string) {
+	s := jwtSecret
+	if s == "" {
+		// Fallback to environment variable if no config value provided
+		s = os.Getenv("JWT_SECRET")
+	}
 	if s == "" {
 		// Generate a secure random key in the development environment.
 		log.Println("WARNING: JWT_SECRET not set — generating a random secret for development")
