@@ -39,6 +39,7 @@ export function PostDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -166,6 +167,20 @@ export function PostDetailPage() {
       } catch (e) {}
     } catch (error) {
       console.error('删除评论失败:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const postUrl = `${window.location.origin}/post/${id}`;
+      await navigator.clipboard.writeText(postUrl);
+      setShareSuccess(true);
+      // 3秒后隐藏成功提示
+      setTimeout(() => {
+        setShareSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('复制链接失败:', error);
     }
   };
 
@@ -362,9 +377,16 @@ export function PostDetailPage() {
             <span>{post.viewCount || 0}</span>
           </div>
         </div>
-        <Button variant="ghost" size="icon">
-          <Share2 className="w-5 h-5" />
-        </Button>
+        <div className="relative">
+          <Button variant="ghost" size="icon" onClick={handleShare}>
+            <Share2 className="w-5 h-5" />
+          </Button>
+          {shareSuccess && (
+            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded whitespace-nowrap">
+              链接已复制到剪贴板
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 评论区 */}
