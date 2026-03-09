@@ -10,6 +10,36 @@ const translations: Record<string, Translations> = {
 
 let currentLocale = 'zh-CN';
 
+function detectLocale(): string {
+  const savedLocale = localStorage.getItem('locale');
+  if (savedLocale === 'zh-CN' || savedLocale === 'en-US') {
+    return savedLocale;
+  }
+
+  if (typeof navigator !== 'undefined') {
+    const languages = navigator.languages || [navigator.language];
+    
+    for (const lang of languages) {
+      if (!lang) continue;
+      
+      const normalizedLang = lang.toLowerCase();
+      
+      if (normalizedLang.startsWith('zh')) {
+        return 'zh-CN';
+      }
+
+      if (normalizedLang.startsWith('en')) {
+        return 'en-US';
+      }
+    }
+  }
+
+  return 'zh-CN';
+}
+
+currentLocale = detectLocale();
+localStorage.setItem('locale', currentLocale);
+
 export function setLocale(locale: string) {
   if (locale === 'zh-CN' || locale === 'en-US') {
     currentLocale = locale;
@@ -43,12 +73,4 @@ export function t(key: string, params?: Record<string, unknown>): string {
   }
   
   return result;
-}
-
-// 初始化：从 localStorage 读取语言设置
-const savedLocale = localStorage.getItem('locale');
-if (savedLocale === 'zh-CN' || savedLocale === 'en-US') {
-  currentLocale = savedLocale;
-} else if (navigator.language.startsWith('zh')) {
-  currentLocale = 'zh-CN';
 }
