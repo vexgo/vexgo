@@ -406,11 +406,20 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
+	// 如果更新头像，删除旧头像
+	if req.Avatar != nil && *req.Avatar != user.Avatar && user.Avatar != "" {
+		// 删除旧头像文件
+		if err := deleteImageFile(user.Avatar); err != nil {
+			// 记录错误但继续执行，避免头像更新失败
+			fmt.Printf("删除旧头像失败 %s: %v\n", user.Avatar, err)
+		}
+		user.Avatar = *req.Avatar
+	} else if req.Avatar != nil {
+		user.Avatar = *req.Avatar
+	}
+
 	if req.Username != nil {
 		user.Username = *req.Username
-	}
-	if req.Avatar != nil {
-		user.Avatar = *req.Avatar
 	}
 	if req.Birthday != nil {
 		user.Birthday = *req.Birthday
