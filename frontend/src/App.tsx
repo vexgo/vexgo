@@ -23,8 +23,30 @@ import { CommentModerationPage } from '@/pages/CommentModerationPage';
 import { CommentConfigPage } from '@/pages/CommentConfigPage';
 import { AISettingsPage } from '@/pages/AISettingsPage';
 import { Toaster } from '@/components/ui/sonner';
+import { useEffect } from 'react';
 
 function App() {
+  // Apply theme on app startup
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
+    const theme = savedTheme || 'light';
+    
+    document.documentElement.classList.remove('light', 'dark');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      // Follow the system to remove specific theme classes
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <I18nProvider>
