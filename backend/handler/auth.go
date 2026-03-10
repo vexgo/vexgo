@@ -196,6 +196,9 @@ func Login(c *gin.Context) {
 			"username": user.Username,
 			"email":    user.Email,
 			"role":     user.Role,
+			"avatar":   user.Avatar,
+			"bio":      user.Bio,
+			"birthday": user.Birthday,
 		},
 	})
 }
@@ -696,5 +699,9 @@ func ResetPassword(c *gin.Context) {
 		return
 	}
 
+<<<<<<< HEAD
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+=======
+	c.JSON(http.StatusOK, gin.H{"message": "密码已重置成功"})
+>>>>>>> 630995e (fix bugs)
 }
