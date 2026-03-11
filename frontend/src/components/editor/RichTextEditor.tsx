@@ -52,22 +52,22 @@ export function RichTextEditor({
   const editorRef = useRef<MDXEditorMethods>(null);
   const isInternalChange = useRef(false);
 
-  // 图片上传处理函数
+  // Image upload handler
   const imageUploadHandler = useCallback(
     async (file: File): Promise<string> => {
       try {
         const response = await uploadApi.uploadFile(file);
         return response.data.file!.url;
       } catch (error) {
-        console.error("上传图片失败:", error);
-        alert("上传图片失败，请重试");
+        console.error("Failed to upload image:", error);
+        alert("Failed to upload image, please try again");
         throw error;
       }
     },
     [],
   );
 
-  // 处理内容变化
+  // Handle content changes
   const handleChange = useCallback(
     (markdown: string) => {
       isInternalChange.current = true;
@@ -76,9 +76,9 @@ export function RichTextEditor({
     [onChange],
   );
 
-  // 使用 useEffect 来同步内容到编辑器
-  // 仅在内容由外部（非编辑器本身）更新时才调用 setMarkdown，
-  // 避免源码模式下每次输入都重置光标位置
+  // Use useEffect to sync content to editor
+  // Only call setMarkdown when content is updated from external source (not from editor itself)
+  // to avoid resetting cursor position on every input in source mode
   useEffect(() => {
     if (isInternalChange.current) {
       isInternalChange.current = false;
@@ -111,8 +111,9 @@ export function RichTextEditor({
         ref={editorRef}
         markdown={content || ""}
         onChange={handleChange}
-        placeholder={placeholder || "开始写作..."}
+        placeholder={placeholder || "Start writing..."}
         contentEditableClassName="prose"
+        className="dark-editor"
         plugins={[
           headingsPlugin(),
           listsPlugin(),
