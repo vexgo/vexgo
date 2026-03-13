@@ -517,7 +517,7 @@ func findOrCreateUser(db *gorm.DB, provider string, info *ssoUserInfo) (*model.U
 		user = model.User{
 			Username:        username,
 			Email:           info.email,
-			Role:            model.RoleContributor,
+			Role:            model.RoleGuest,
 			PasswordVersion: 0,
 			// No password set — this user can only log in via SSO
 		}

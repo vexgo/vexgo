@@ -110,7 +110,7 @@ func Register(c *gin.Context) {
 		Username:      req.Username,
 		Email:         req.Email,
 		Password:      string(hashedPassword),
-		Role:          "contributor", // Default role is contributor
+		Role:          model.RoleGuest, // Default role is guest
 		EmailVerified: false,
 	}
 
