@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 	"vexgo/backend/cmd"
@@ -22,10 +23,30 @@ func main() {
 	// 2.1 Load SSO configuration from config file (overrides environment variables)
 	config.LoadFromConfig(cfg)
 
-	// Set data directory (for file uploads)
+	// Set data directory (for file uploads, only used if S3 is not enabled)
 	handler.DataDir = cfg.DataDir
 
-	// 3. Initialize database connection (ensure database driver and connection string are configured correctly)
+	// 3. Initialize S3 storage if enabled
+	if cfg.S3Enabled {
+		s3Cfg := &config.S3Config{
+			Enabled:      cfg.S3Enabled,
+			Endpoint:     cfg.S3Endpoint,
+			Region:       cfg.S3Region,
+			Bucket:       cfg.S3Bucket,
+			AccessKey:    cfg.S3AccessKey,
+			SecretKey:    cfg.S3SecretKey,
+			ForcePath:    cfg.S3ForcePath,
+			CustomDomain: cfg.S3CustomDomain,
+		}
+		if err := handler.InitS3(s3Cfg); err != nil {
+			panic(err)
+		}
+		fmt.Println("S3 storage initialized")
+	} else {
+		fmt.Println("Using local file storage")
+	}
+
+	// 4. Initialize database connection (ensure database driver and connection string are configured correctly)
 	handler.InitDB(cfg, cfg.DataDir)
 	// Set database connection to authentication middleware
 	middleware.SetDB(handler.DB())
@@ -145,8 +166,11 @@ func main() {
 	}
 
 	// ===================== Static file hosting =====================
-	mediaDir := filepath.Join(cfg.DataDir, "media")
-	r.Static("/uploads", mediaDir)
+	// Only serve local uploads if S3 is not enabled
+	if !cfg.S3Enabled {
+		mediaDir := filepath.Join(cfg.DataDir, "media")
+		r.Static("/uploads", mediaDir)
+	}
 
 	r.GET("/assets/*filepath", func(c *gin.Context) {
 		file := strings.TrimPrefix(c.Param("filepath"), "/")

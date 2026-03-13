@@ -51,6 +51,16 @@ type Config struct {
 
 	// Global options
 	AllowLocalLogin bool `yaml:"allow_local_login"` // Allow password-based login (default: true)
+
+	// S3 configuration
+	S3Enabled      bool   `yaml:"s3_enabled"`       // Enable S3 storage
+	S3Endpoint     string `yaml:"s3_endpoint"`      // S3 endpoint URL
+	S3Region       string `yaml:"s3_region"`        // AWS region
+	S3Bucket       string `yaml:"s3_bucket"`        // S3 bucket name
+	S3AccessKey    string `yaml:"s3_access_key"`    // S3 access key ID
+	S3SecretKey    string `yaml:"s3_secret_key"`    // S3 secret access key
+	S3ForcePath    bool   `yaml:"s3_force_path"`    // Force path-style URLs
+	S3CustomDomain string `yaml:"s3_custom_domain"` // Optional custom domain for S3 URLs
 }
 
 // ParseFlags parses command line flags and returns the server configuration
@@ -69,6 +79,16 @@ func ParseFlags() *Config {
 		Port:      getIntEnvOrDefault("PORT", *port, 3001),
 		DataDir:   getEnvOrDefault("DATA_DIR", *dataDir, "./data"),
 		JWTSecret: getEnvOrDefault("JWT_SECRET", "", ""),
+
+		// S3 configuration defaults
+		S3Enabled:      getBoolEnvOrDefault("S3_ENABLED", false),
+		S3Endpoint:     getEnvOrDefault("S3_ENDPOINT", "", ""),
+		S3Region:       getEnvOrDefault("S3_REGION", "", ""),
+		S3Bucket:       getEnvOrDefault("S3_BUCKET", "", ""),
+		S3AccessKey:    getEnvOrDefault("S3_ACCESS_KEY", "", ""),
+		S3SecretKey:    getEnvOrDefault("S3_SECRET_KEY", "", ""),
+		S3ForcePath:    getBoolEnvOrDefault("S3_FORCE_PATH", false),
+		S3CustomDomain: getEnvOrDefault("S3_CUSTOM_DOMAIN", "", ""),
 	}
 
 	// If config file is specified, load it (overrides env and defaults, but not command line flags)
@@ -111,7 +131,17 @@ func getIntEnvOrDefault(key string, value, defaultValue int) int {
 	return defaultValue // finally use default
 }
 
-// applyEnvOverrides applies environment variable overrides for database configuration
+// getBoolEnvOrDefault gets boolean environment variable or returns default value
+func getBoolEnvOrDefault(key string, defaultValue bool) bool {
+	if env := os.Getenv(key); env != "" {
+		if b, err := strconv.ParseBool(env); err == nil {
+			return b
+		}
+	}
+	return defaultValue
+}
+
+// applyEnvOverrides applies environment variable overrides for database and S3 configuration
 // Only applies if the config field is empty (not set by config file or command line)
 func applyEnvOverrides(cfg *Config) {
 	// JWT Secret
@@ -278,6 +308,52 @@ func applyEnvOverrides(cfg *Config) {
 			cfg.GoogleClientSecret = env
 		}
 	}
+
+	// S3 configuration
+	if !cfg.S3Enabled {
+		if env := os.Getenv("S3_ENABLED"); env != "" {
+			if b, err := strconv.ParseBool(env); err == nil {
+				cfg.S3Enabled = b
+			}
+		}
+	}
+	if cfg.S3Endpoint == "" {
+		if env := os.Getenv("S3_ENDPOINT"); env != "" {
+			cfg.S3Endpoint = env
+		}
+	}
+	if cfg.S3Region == "" {
+		if env := os.Getenv("S3_REGION"); env != "" {
+			cfg.S3Region = env
+		}
+	}
+	if cfg.S3Bucket == "" {
+		if env := os.Getenv("S3_BUCKET"); env != "" {
+			cfg.S3Bucket = env
+		}
+	}
+	if cfg.S3AccessKey == "" {
+		if env := os.Getenv("S3_ACCESS_KEY"); env != "" {
+			cfg.S3AccessKey = env
+		}
+	}
+	if cfg.S3SecretKey == "" {
+		if env := os.Getenv("S3_SECRET_KEY"); env != "" {
+			cfg.S3SecretKey = env
+		}
+	}
+	if !cfg.S3ForcePath {
+		if env := os.Getenv("S3_FORCE_PATH"); env != "" {
+			if b, err := strconv.ParseBool(env); err == nil {
+				cfg.S3ForcePath = b
+			}
+		}
+	}
+	if cfg.S3CustomDomain == "" {
+		if env := os.Getenv("S3_CUSTOM_DOMAIN"); env != "" {
+			cfg.S3CustomDomain = env
+		}
+	}
 }
 
 // loadConfigFile loads configuration from a YAML file
@@ -397,6 +473,32 @@ func loadConfigFile(filename string, cfg *Config) error {
 	}
 	if cfg.GoogleClientSecret == "" && temp.GoogleClientSecret != "" {
 		cfg.GoogleClientSecret = temp.GoogleClientSecret
+	}
+
+	// S3 configuration
+	if !cfg.S3Enabled && temp.S3Enabled {
+		cfg.S3Enabled = temp.S3Enabled
+	}
+	if cfg.S3Endpoint == "" && temp.S3Endpoint != "" {
+		cfg.S3Endpoint = temp.S3Endpoint
+	}
+	if cfg.S3Region == "" && temp.S3Region != "" {
+		cfg.S3Region = temp.S3Region
+	}
+	if cfg.S3Bucket == "" && temp.S3Bucket != "" {
+		cfg.S3Bucket = temp.S3Bucket
+	}
+	if cfg.S3AccessKey == "" && temp.S3AccessKey != "" {
+		cfg.S3AccessKey = temp.S3AccessKey
+	}
+	if cfg.S3SecretKey == "" && temp.S3SecretKey != "" {
+		cfg.S3SecretKey = temp.S3SecretKey
+	}
+	if !cfg.S3ForcePath && temp.S3ForcePath {
+		cfg.S3ForcePath = temp.S3ForcePath
+	}
+	if cfg.S3CustomDomain == "" && temp.S3CustomDomain != "" {
+		cfg.S3CustomDomain = temp.S3CustomDomain
 	}
 
 	return nil

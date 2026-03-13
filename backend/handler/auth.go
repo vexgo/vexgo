@@ -299,11 +299,10 @@ func UpdatePost(c *gin.Context) {
 func extractImageURLs(content string) []string {
 	var urls []string
 
-	// Match src attribute of <img> tags
+	// 1. Match src attribute of <img> tags (HTML)
 	// Regex matches src="..." or src='...' or src=...
-	re := regexp.MustCompile(`<img[^>]+src=["']([^"']+)["'][^>]*>`)
-	matches := re.FindAllStringSubmatch(content, -1)
-
+	reImg := regexp.MustCompile(`<img[^>]+src=["']([^"']+)["'][^>]*>`)
+	matches := reImg.FindAllStringSubmatch(content, -1)
 	for _, match := range matches {
 		if len(match) >= 2 {
 			url := strings.TrimSpace(match[1])
@@ -313,11 +312,63 @@ func extractImageURLs(content string) []string {
 		}
 	}
 
+	// 2. Match Markdown image syntax: ![alt](url)
+	// Pattern: ![anything](url)
+	reMarkdown := regexp.MustCompile(`!\[[^\]]*\]\(([^)]+)\)`)
+	matches = reMarkdown.FindAllStringSubmatch(content, -1)
+	for _, match := range matches {
+		if len(match) >= 2 {
+			url := strings.TrimSpace(match[1])
+			if url != "" {
+				urls = append(urls, url)
+			}
+		}
+	}
+
+	// 3. Match reference-style Markdown images: ![alt][ref]
+	// and then find the reference definition: [ref]: url
+	reRef := regexp.MustCompile(`!\[[^\]]*\]\[([^]]+)\]`)
+	matches = reRef.FindAllStringSubmatch(content, -1)
+	for _, match := range matches {
+		if len(match) >= 2 {
+			ref := strings.TrimSpace(match[1])
+			// Find the reference definition
+			reDef := regexp.MustCompile(`^\s*\[` + regexp.QuoteMeta(ref) + `\]:\s*(\S+)`)
+			for _, line := range strings.Split(content, "\n") {
+				if defMatch := reDef.FindStringSubmatch(line); len(defMatch) >= 2 {
+					url := strings.TrimSpace(defMatch[1])
+					if url != "" {
+						urls = append(urls, url)
+					}
+					break
+				}
+			}
+		}
+	}
+
 	return urls
 }
 
 // Delete file (must be uploader or admin)
 func deleteImageFile(url string) error {
+	// Check if using S3 storage
+	if UseS3Storage && S3Cfg != nil {
+		// Extract S3 key from URL
+		key := ExtractS3Key(url, S3Cfg)
+		fmt.Printf("S3 delete: url=%s, extracted key=%s, cfg.CustomDomain=%s, cfg.ForcePath=%v\n", url, key, S3Cfg.CustomDomain, S3Cfg.ForcePath)
+		if key != "" {
+			return DeleteFileFromS3(key)
+		}
+		// If key extraction failed, try to delete using filename as key (fallback)
+		filename := filepath.Base(url)
+		if filename != "" && filename != "/" {
+			fmt.Printf("Trying fallback delete with filename as key: %s\n", filename)
+			return DeleteFileFromS3(filename)
+		}
+		return fmt.Errorf("invalid S3 key from URL: %s", url)
+	}
+
+	// Local storage
 	// Extract filename from URL, e.g.: /uploads/abc123.jpg -> abc123.jpg
 	filename := filepath.Base(url)
 	if filename == "" || filename == "/" {
