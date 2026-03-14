@@ -56,6 +56,32 @@ func main() {
 	// 4. Create Gin engine instance (includes Logger and Recovery middleware by default)
 	r := gin.Default()
 
+	// Configure trusted proxies based on environment/configuration
+	// If BEHIND_REVERSE_PROXY=true, use TRUSTED_PROXIES list or common defaults
+	// If BEHIND_REVERSE_PROXY=false, disable proxy trust (no warning)
+	if cfg.BehindReverseProxy {
+		if len(cfg.TrustedProxies) > 0 {
+			// Use explicitly configured trusted proxies
+			r.SetTrustedProxies(cfg.TrustedProxies)
+			fmt.Printf("Trusted proxies configured: %v\n", cfg.TrustedProxies)
+		} else {
+			// Use common defaults: trust all private IP ranges and localhost
+			// This is a reasonable default for self-hosted behind reverse proxy
+			defaultProxies := []string{
+				"127.0.0.1",
+				"::1",
+				"192.168.0.0/16",
+				"10.0.0.0/8",
+				"172.16.0.0/12",
+			}
+			r.SetTrustedProxies(defaultProxies)
+			fmt.Printf("Trusted proxies set to common private networks (behind reverse proxy)\n")
+		}
+	} else {
+		// Not behind a reverse proxy, disable trust
+		r.SetTrustedProxies(nil)
+	}
+
 	// ===================== Core API routing group (all endpoints under /api) =====================
 	api := r.Group("/api")
 	api.Use(middleware.OptionalJWTAuth())

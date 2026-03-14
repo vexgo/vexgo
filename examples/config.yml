@@ -50,7 +50,7 @@ google_client_secret: ""
 # -------------------- OIDC (OpenID Connect) --------------------
 # Generic OIDC provider support (Keycloak, Authentik, Okta, Authelia, etc.)
 # Enable OIDC login
-oidc_enabled: false
+oidc_enabled: true
 
 # OIDC discovery URL (required when enabled)
 # The server will fetch the OIDC configuration from: {issuer_url}/.well-known/openid-configuration
@@ -118,3 +118,18 @@ s3_custom_domain: ""
 
 # Disable including bucket in custom domain URLs (default: false, meaning include bucket by default)
 s3_disable_bucket_in_custom_url: false
+
+# ==================== Trusted Proxies Configuration ====================
+
+# Whether the server is behind a reverse proxy (e.g., nginx, Cloudflare)
+# Set to true if you're using a reverse proxy that sets X-Forwarded-* headers
+behind_reverse_proxy: false
+
+# List of trusted proxy IPs/CIDRs (comma-separated)
+# Only used when behind_reverse_proxy=true
+# If empty, defaults to common private networks: 127.0.0.1, ::1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12
+# Examples:
+#   - Single proxy: ["192.168.1.100"]
+#   - Multiple: ["192.168.1.100", "10.0.0.1"]
+#   - CIDR notation: ["192.168.1.0/24"]
+trusted_proxies: []

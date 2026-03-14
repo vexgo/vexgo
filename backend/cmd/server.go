@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 )
@@ -52,6 +53,10 @@ type Config struct {
 	// Global options
 	AllowLocalLogin bool `yaml:"allow_local_login"` // Allow password-based login (default: true)
 
+	// Trusted proxies configuration
+	TrustedProxies     []string `yaml:"trusted_proxies"`      // List of trusted proxy IPs/CIDRs (empty = trust none)
+	BehindReverseProxy bool     `yaml:"behind_reverse_proxy"` // Whether the server is behind a reverse proxy (default: false)
+
 	// S3 configuration
 	S3Enabled                  bool   `yaml:"s3_enabled"`                      // Enable S3 storage
 	S3Endpoint                 string `yaml:"s3_endpoint"`                     // S3 endpoint URL
@@ -91,6 +96,10 @@ func ParseFlags() *Config {
 		S3ForcePath:                getBoolEnvOrDefault("S3_FORCE_PATH", false),
 		S3CustomDomain:             getEnvOrDefault("S3_CUSTOM_DOMAIN", "", ""),
 		S3DisableBucketInCustomURL: getBoolEnvOrDefault("S3_DISABLE_BUCKET_IN_CUSTOM_URL", false),
+
+		// Trusted proxies configuration
+		TrustedProxies:     parseTrustedProxies(getEnvOrDefault("TRUSTED_PROXIES", "", "")),
+		BehindReverseProxy: getBoolEnvOrDefault("BEHIND_REVERSE_PROXY", false),
 	}
 
 	// If config file is specified, load it (overrides env and defaults, but not command line flags)
@@ -104,6 +113,9 @@ func ParseFlags() *Config {
 
 	// Apply environment variable overrides for database config (only if not set by config file or command line)
 	applyEnvOverrides(cfg)
+
+	// Apply trusted proxies from config file (already loaded by loadConfigFile)
+	// No additional processing needed - cfg.TrustedProxies is already set
 
 	return cfg
 }
@@ -468,6 +480,15 @@ func loadConfigFile(filename string, cfg *Config) error {
 		cfg.AllowLocalLogin = temp.AllowLocalLogin
 	}
 
+	// Trusted proxies configuration
+	// Handle the case where trusted_proxies might be an empty string in YAML
+	if temp.TrustedProxies != nil {
+		cfg.TrustedProxies = temp.TrustedProxies
+	}
+	if temp.BehindReverseProxy {
+		cfg.BehindReverseProxy = temp.BehindReverseProxy
+	}
+
 	// GitHub OAuth configuration
 	if cfg.GitHubClientID == "" && temp.GitHubClientID != "" {
 		cfg.GitHubClientID = temp.GitHubClientID
@@ -526,4 +547,19 @@ func PrintUsage() {
 	fmt.Printf("Usage: %s [options]\n", os.Args[0])
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
+}
+
+// parseTrustedProxies parses a comma-separated list of trusted proxies
+func parseTrustedProxies(s string) []string {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if trimmed := strings.TrimSpace(p); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
