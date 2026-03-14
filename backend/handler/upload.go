@@ -270,10 +270,25 @@ func ExtractS3Key(url string, cfg *config.S3Config) string {
 		return ""
 	}
 
-	// If using custom domain, everything after the domain is the key
-	if cfg.CustomDomain != "" {
+	// If using custom domain, check if bucket is included in URL
+	customDomain := cfg.CustomDomain
+	if strings.HasPrefix(customDomain, "http://") {
+		customDomain = strings.TrimPrefix(customDomain, "http://")
+	} else if strings.HasPrefix(customDomain, "https://") {
+		customDomain = strings.TrimPrefix(customDomain, "https://")
+	}
+	if customDomain != "" {
 		if len(parts) > 1 {
-			return strings.Join(parts[1:], "/")
+			if !cfg.DisableBucketInCustomURL {
+				// Format: customdomain/bucket/key -> skip domain and bucket
+				if len(parts) >= 3 {
+					return strings.Join(parts[2:], "/")
+				}
+				return ""
+			} else {
+				// Format: customdomain/key -> skip domain
+				return strings.Join(parts[1:], "/")
+			}
 		}
 		return ""
 	}

@@ -53,14 +53,15 @@ type Config struct {
 	AllowLocalLogin bool `yaml:"allow_local_login"` // Allow password-based login (default: true)
 
 	// S3 configuration
-	S3Enabled      bool   `yaml:"s3_enabled"`       // Enable S3 storage
-	S3Endpoint     string `yaml:"s3_endpoint"`      // S3 endpoint URL
-	S3Region       string `yaml:"s3_region"`        // AWS region
-	S3Bucket       string `yaml:"s3_bucket"`        // S3 bucket name
-	S3AccessKey    string `yaml:"s3_access_key"`    // S3 access key ID
-	S3SecretKey    string `yaml:"s3_secret_key"`    // S3 secret access key
-	S3ForcePath    bool   `yaml:"s3_force_path"`    // Force path-style URLs
-	S3CustomDomain string `yaml:"s3_custom_domain"` // Optional custom domain for S3 URLs
+	S3Enabled                  bool   `yaml:"s3_enabled"`                      // Enable S3 storage
+	S3Endpoint                 string `yaml:"s3_endpoint"`                     // S3 endpoint URL
+	S3Region                   string `yaml:"s3_region"`                       // AWS region
+	S3Bucket                   string `yaml:"s3_bucket"`                       // S3 bucket name
+	S3AccessKey                string `yaml:"s3_access_key"`                   // S3 access key ID
+	S3SecretKey                string `yaml:"s3_secret_key"`                   // S3 secret access key
+	S3ForcePath                bool   `yaml:"s3_force_path"`                   // Force path-style URLs
+	S3CustomDomain             string `yaml:"s3_custom_domain"`                // Optional custom domain for S3 URLs
+	S3DisableBucketInCustomURL bool   `yaml:"s3_disable_bucket_in_custom_url"` // Disable including bucket in custom domain URLs (default: false, meaning include bucket by default)
 }
 
 // ParseFlags parses command line flags and returns the server configuration
@@ -81,14 +82,15 @@ func ParseFlags() *Config {
 		JWTSecret: getEnvOrDefault("JWT_SECRET", "", ""),
 
 		// S3 configuration defaults
-		S3Enabled:      getBoolEnvOrDefault("S3_ENABLED", false),
-		S3Endpoint:     getEnvOrDefault("S3_ENDPOINT", "", ""),
-		S3Region:       getEnvOrDefault("S3_REGION", "", ""),
-		S3Bucket:       getEnvOrDefault("S3_BUCKET", "", ""),
-		S3AccessKey:    getEnvOrDefault("S3_ACCESS_KEY", "", ""),
-		S3SecretKey:    getEnvOrDefault("S3_SECRET_KEY", "", ""),
-		S3ForcePath:    getBoolEnvOrDefault("S3_FORCE_PATH", false),
-		S3CustomDomain: getEnvOrDefault("S3_CUSTOM_DOMAIN", "", ""),
+		S3Enabled:                  getBoolEnvOrDefault("S3_ENABLED", false),
+		S3Endpoint:                 getEnvOrDefault("S3_ENDPOINT", "", ""),
+		S3Region:                   getEnvOrDefault("S3_REGION", "", ""),
+		S3Bucket:                   getEnvOrDefault("S3_BUCKET", "", ""),
+		S3AccessKey:                getEnvOrDefault("S3_ACCESS_KEY", "", ""),
+		S3SecretKey:                getEnvOrDefault("S3_SECRET_KEY", "", ""),
+		S3ForcePath:                getBoolEnvOrDefault("S3_FORCE_PATH", false),
+		S3CustomDomain:             getEnvOrDefault("S3_CUSTOM_DOMAIN", "", ""),
+		S3DisableBucketInCustomURL: getBoolEnvOrDefault("S3_DISABLE_BUCKET_IN_CUSTOM_URL", false),
 	}
 
 	// If config file is specified, load it (overrides env and defaults, but not command line flags)
@@ -354,6 +356,13 @@ func applyEnvOverrides(cfg *Config) {
 			cfg.S3CustomDomain = env
 		}
 	}
+	if !cfg.S3DisableBucketInCustomURL {
+		if env := os.Getenv("S3_DISABLE_BUCKET_IN_CUSTOM_URL"); env != "" {
+			if b, err := strconv.ParseBool(env); err == nil {
+				cfg.S3DisableBucketInCustomURL = b
+			}
+		}
+	}
 }
 
 // loadConfigFile loads configuration from a YAML file
@@ -499,6 +508,9 @@ func loadConfigFile(filename string, cfg *Config) error {
 	}
 	if cfg.S3CustomDomain == "" && temp.S3CustomDomain != "" {
 		cfg.S3CustomDomain = temp.S3CustomDomain
+	}
+	if !cfg.S3DisableBucketInCustomURL && temp.S3DisableBucketInCustomURL {
+		cfg.S3DisableBucketInCustomURL = temp.S3DisableBucketInCustomURL
 	}
 
 	return nil

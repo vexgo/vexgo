@@ -90,7 +90,9 @@ func UploadFileToS3(reader io.Reader, filename string, contentType string) (stri
 		return "", fmt.Errorf("failed to upload to S3: %w", err)
 	}
 
-	return GetFileURL(filename), nil
+	url := S3Cfg.GetURL(filename)
+	fmt.Printf("Uploaded file, generated URL: %s\n", url)
+	return url, nil
 }
 
 // DeleteFileFromS3 removes an object from the configured S3 bucket by key.

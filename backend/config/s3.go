@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // S3Config holds S3-compatible storage configuration
 type S3Config struct {
-	Enabled      bool   `yaml:"enabled"`       // Enable S3 storage
-	Endpoint     string `yaml:"endpoint"`      // S3 endpoint URL (e.g., "https://s3.amazonaws.com" or MinIO endpoint)
-	Region       string `yaml:"region"`        // AWS region (e.g., "us-east-1")
-	Bucket       string `yaml:"bucket"`        // S3 bucket name
-	AccessKey    string `yaml:"access_key"`    // S3 access key ID
-	SecretKey    string `yaml:"secret_key"`    // S3 secret access key
-	ForcePath    bool   `yaml:"force_path"`    // Force path-style URLs (for MinIO, Wasabi, etc.)
-	CustomDomain string `yaml:"custom_domain"` // Optional custom domain for S3 URLs (e.g., "cdn.example.com")
+	Enabled                  bool   `yaml:"enabled"`                      // Enable S3 storage
+	Endpoint                 string `yaml:"endpoint"`                     // S3 endpoint URL (e.g., "https://s3.amazonaws.com" or MinIO endpoint)
+	Region                   string `yaml:"region"`                       // AWS region (e.g., "us-east-1")
+	Bucket                   string `yaml:"bucket"`                       // S3 bucket name
+	AccessKey                string `yaml:"access_key"`                   // S3 access key ID
+	SecretKey                string `yaml:"secret_key"`                   // S3 secret access key
+	ForcePath                bool   `yaml:"force_path"`                   // Force path-style URLs (for MinIO, Wasabi, etc.)
+	CustomDomain             string `yaml:"custom_domain"`                // Optional custom domain for S3 URLs (e.g., "cdn.example.com")
+	DisableBucketInCustomURL bool   `yaml:"disable_bucket_in_custom_url"` // Disable including bucket in custom domain URLs (default: false, meaning include bucket by default)
 }
 
 // IsEnabled returns true if S3 storage is enabled
@@ -25,14 +27,27 @@ func (s *S3Config) IsEnabled() bool {
 
 // GetURL returns the public URL for an object in S3
 func (s *S3Config) GetURL(key string) string {
+	fmt.Printf("S3 GetURL: CustomDomain='%s', DisableBucketInCustomURL=%v, Bucket='%s', key='%s'\n", s.CustomDomain, s.DisableBucketInCustomURL, s.Bucket, key)
 	if s.CustomDomain != "" {
-		return fmt.Sprintf("https://%s/%s", s.CustomDomain, key)
+		domain := s.CustomDomain
+		if !strings.HasPrefix(domain, "http://") && !strings.HasPrefix(domain, "https://") {
+			domain = "https://" + domain
+		}
+		fmt.Printf("S3 GetURL: domain='%s'\n", domain)
+		if !s.DisableBucketInCustomURL {
+			url := fmt.Sprintf("%s/%s/%s", domain, s.Bucket, key)
+			fmt.Printf("S3 GetURL: including bucket, url='%s'\n", url)
+			return url
+		}
+		url := fmt.Sprintf("%s/%s", domain, key)
+		fmt.Printf("S3 GetURL: not including bucket, url='%s'\n", url)
+		return url
 	}
 	// Default S3 URL format
 	if s.ForcePath {
 		return fmt.Sprintf("https://%s.%s/%s", s.Bucket, s.Endpoint, key)
 	}
-	return fmt.Sprintf("https://%s.%s/%s", s.Bucket, s.Region, key)
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.Bucket, s.Region, key)
 }
 
 // LoadFromEnv loads S3 configuration from environment variables
@@ -80,6 +95,13 @@ func (s *S3Config) LoadFromEnv() {
 	if env := os.Getenv("S3_CUSTOM_DOMAIN"); env != "" {
 		s.CustomDomain = env
 	}
+
+	// S3_DISABLE_BUCKET_IN_CUSTOM_URL: "true" or "false" for disabling bucket in custom URL
+	if env := os.Getenv("S3_DISABLE_BUCKET_IN_CUSTOM_URL"); env != "" {
+		if b, err := strconv.ParseBool(env); err == nil {
+			s.DisableBucketInCustomURL = b
+		}
+	}
 }
 
 // MergeFromConfig merges configuration from another S3Config (only fills empty fields)
@@ -107,6 +129,9 @@ func (s *S3Config) MergeFromConfig(other *S3Config) {
 	}
 	if other.CustomDomain != "" {
 		s.CustomDomain = other.CustomDomain
+	}
+	if !s.DisableBucketInCustomURL && other.DisableBucketInCustomURL {
+		s.DisableBucketInCustomURL = other.DisableBucketInCustomURL
 	}
 }
 

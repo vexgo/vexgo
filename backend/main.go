@@ -29,15 +29,17 @@ func main() {
 	// 3. Initialize S3 storage if enabled
 	if cfg.S3Enabled {
 		s3Cfg := &config.S3Config{
-			Enabled:      cfg.S3Enabled,
-			Endpoint:     cfg.S3Endpoint,
-			Region:       cfg.S3Region,
-			Bucket:       cfg.S3Bucket,
-			AccessKey:    cfg.S3AccessKey,
-			SecretKey:    cfg.S3SecretKey,
-			ForcePath:    cfg.S3ForcePath,
-			CustomDomain: cfg.S3CustomDomain,
+			Enabled:                  cfg.S3Enabled,
+			Endpoint:                 cfg.S3Endpoint,
+			Region:                   cfg.S3Region,
+			Bucket:                   cfg.S3Bucket,
+			AccessKey:                cfg.S3AccessKey,
+			SecretKey:                cfg.S3SecretKey,
+			ForcePath:                cfg.S3ForcePath,
+			CustomDomain:             cfg.S3CustomDomain,
+			DisableBucketInCustomURL: cfg.S3DisableBucketInCustomURL,
 		}
+		fmt.Printf("S3 Config Loaded: Enabled=%v, Endpoint=%s, Region=%s, Bucket=%s, CustomDomain=%s, DisableBucketInCustomURL=%v\n", s3Cfg.Enabled, s3Cfg.Endpoint, s3Cfg.Region, s3Cfg.Bucket, s3Cfg.CustomDomain, s3Cfg.DisableBucketInCustomURL)
 		if err := handler.InitS3(s3Cfg); err != nil {
 			panic(err)
 		}
