@@ -165,7 +165,7 @@ func CreateComment(c *gin.Context) {
 			}
 		}
 
-		// 更新评论状态
+		// Update comment status
 		if err := db.Save(&comment).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment status"})
 			return
