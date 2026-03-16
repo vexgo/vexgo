@@ -23,7 +23,7 @@ interface ThemeInfo {
   url: string;
 }
 
-export function AdminThemePage() {
+export function ThemePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
