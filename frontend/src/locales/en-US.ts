@@ -265,6 +265,8 @@ export const enUS = {
     captchaDesc: "Enable sliding puzzle captcha for enhanced security",
     registration: "Allow Registration",
     registrationDesc: "Allow new users to register accounts",
+    allowGuestViewPosts: "Allow Guests to View Posts",
+    allowGuestViewPostsDesc: "When enabled, unlogged users can view post content",
     saveSettings: "Save Settings",
     saving: "Saving...",
     siteNameRequired: "Please enter site name",

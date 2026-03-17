@@ -24,6 +24,7 @@ type GeneralSettings struct {
 	ID                  uint      `json:"id" gorm:"primaryKey"`
 	CaptchaEnabled      bool      `json:"captchaEnabled" gorm:"default:false"`     // Whether captcha verification is enabled
 	RegistrationEnabled bool      `json:"registrationEnabled" gorm:"default:true"` // Whether registration is allowed
+	AllowGuestViewPosts bool      `json:"allowGuestViewPosts" gorm:"default:true"` // Whether guests can view posts
 	SiteName            string    `json:"siteName" gorm:"size:100;default:VexGo"`  // Site name
 	SiteDescription     string    `json:"siteDescription" gorm:"type:text"`        // Site description
 	ItemsPerPage        int       `json:"itemsPerPage" gorm:"default:20"`          // Items per page

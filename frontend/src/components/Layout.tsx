@@ -30,9 +30,11 @@ export function Layout({ children }: LayoutProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [siteName, setSiteName] = useState('VexGo');
+  const [allowGuestView, setAllowGuestView] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadSiteName = async () => {
+    const loadSettings = async () => {
       try {
         const response = await configApi.getGeneralSettings();
         if (response.data.siteName) {
@@ -40,12 +42,26 @@ export function Layout({ children }: LayoutProps) {
           // 更新网页标题
           document.title = response.data.siteName;
         }
+        // 加载允许访客浏览的设置
+        setAllowGuestView(response.data.allowGuestViewPosts !== false);
       } catch (error) {
         console.error(t('common.error'), error);
+      } finally {
+        setLoading(false);
       }
     };
-    loadSiteName();
+    loadSettings();
   }, []);
+
+  // 检查是否需要重定向到登录页面
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !allowGuestView) {
+      // 只在非登录页面且需要登录时重定向
+      if (location.pathname !== '/login' && location.pathname !== '/register') {
+        navigate('/login');
+      }
+    }
+  }, [loading, isAuthenticated, allowGuestView, navigate, location.pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +96,10 @@ export function Layout({ children }: LayoutProps) {
     }
     return location.pathname.startsWith(path);
   };
+
+  if (loading) {
+    return null; // 或者返回一个加载状态
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

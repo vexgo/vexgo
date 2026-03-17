@@ -276,6 +276,7 @@ func GetGeneralSettings(c *gin.Context) {
 			c.JSON(http.StatusOK, model.GeneralSettings{
 				CaptchaEnabled:      false,
 				RegistrationEnabled: true,
+				AllowGuestViewPosts: true,
 				SiteName:            "VexGo",
 				SiteDescription:     "",
 				ItemsPerPage:        20,
@@ -294,6 +295,7 @@ func UpdateGeneralSettings(c *gin.Context) {
 	var req struct {
 		CaptchaEnabled      bool   `json:"captchaEnabled"`
 		RegistrationEnabled bool   `json:"registrationEnabled"`
+		AllowGuestViewPosts bool   `json:"allowGuestViewPosts"`
 		SiteName            string `json:"siteName"`
 		SiteDescription     string `json:"siteDescription"`
 		ItemsPerPage        int    `json:"itemsPerPage"`
@@ -312,6 +314,7 @@ func UpdateGeneralSettings(c *gin.Context) {
 			config = model.GeneralSettings{
 				CaptchaEnabled:      req.CaptchaEnabled,
 				RegistrationEnabled: req.RegistrationEnabled,
+				AllowGuestViewPosts: req.AllowGuestViewPosts,
 				SiteName:            req.SiteName,
 				SiteDescription:     req.SiteDescription,
 				ItemsPerPage:        req.ItemsPerPage,
@@ -328,6 +331,7 @@ func UpdateGeneralSettings(c *gin.Context) {
 		// Update existing configuration
 		config.CaptchaEnabled = req.CaptchaEnabled
 		config.RegistrationEnabled = req.RegistrationEnabled
+		config.AllowGuestViewPosts = req.AllowGuestViewPosts
 		config.SiteName = req.SiteName
 		config.SiteDescription = req.SiteDescription
 		config.ItemsPerPage = req.ItemsPerPage

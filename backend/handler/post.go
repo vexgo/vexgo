@@ -64,6 +64,30 @@ func GetPosts(c *gin.Context) {
 		}
 	}
 
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"posts": posts,
+			"pagination": gin.H{
+				"total":      0,
+				"page":       page,
+				"limit":      limit,
+				"totalPages": 1,
+			},
+		})
+		return
+	}
+
 	// Build query
 	query := db.Model(&model.Post{}).
 		Preload("Author").
@@ -196,6 +220,22 @@ func GetPost(c *gin.Context) {
 				currentUserRole = role
 			}
 		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return 403
+	if currentUserRole == "" && !allowGuestView {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You must be logged in to view this post"})
+		return
 	}
 
 	// Apply privacy filtering to author (if not admin and not viewing own post)
@@ -550,6 +590,30 @@ func GetUserPosts(c *gin.Context) {
 				currentUserRole = role
 			}
 		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if currentUserRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"posts": posts,
+			"pagination": gin.H{
+				"total":      0,
+				"page":       page,
+				"limit":      limit,
+				"totalPages": 1,
+			},
+		})
+		return
 	}
 
 	// Build query

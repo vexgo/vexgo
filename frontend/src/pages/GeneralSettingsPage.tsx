@@ -20,6 +20,7 @@ export function GeneralSettingsPage() {
     id: '',
     captchaEnabled: false,
     registrationEnabled: true,
+    allowGuestViewPosts: true,
     siteName: t('common.siteName') || 'VexGo',
     siteDescription: '',
     itemsPerPage: 20,
@@ -180,6 +181,21 @@ export function GeneralSettingsPage() {
               id="registrationEnabled"
               checked={config.registrationEnabled}
               onCheckedChange={(checked) => setConfig({ ...config, registrationEnabled: checked })}
+            />
+          </div>
+
+          {/* 允许访客浏览文章 */}
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="allowGuestViewPosts">{t('generalSettings.allowGuestViewPosts')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('generalSettings.allowGuestViewPostsDesc')}
+              </p>
+            </div>
+            <Switch
+              id="allowGuestViewPosts"
+              checked={config.allowGuestViewPosts}
+              onCheckedChange={(checked) => setConfig({ ...config, allowGuestViewPosts: checked })}
             />
           </div>
         </CardContent>

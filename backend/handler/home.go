@@ -10,6 +10,40 @@ import (
 
 // Get statistics
 func GetStats(c *gin.Context) {
+	// Get current user role
+	var userRole string
+	if userContext, exists := c.Get("user"); exists {
+		if userMap, ok := userContext.(map[string]interface{}); ok {
+			if role, ok := userMap["role"].(string); ok {
+				userRole = role
+			}
+		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"stats": gin.H{
+				"posts":      0,
+				"users":      0,
+				"comments":   0,
+				"categories": 0,
+				"tags":       0,
+			},
+		})
+		return
+	}
+
 	var postsCount, usersCount, categoriesCount, tagsCount, commentsCount int64
 
 	db.Model(&model.Post{}).Count(&postsCount)
@@ -31,6 +65,34 @@ func GetStats(c *gin.Context) {
 
 // Get popular posts
 func GetPopularPosts(c *gin.Context) {
+	// Get current user role
+	var userRole string
+	if userContext, exists := c.Get("user"); exists {
+		if userMap, ok := userContext.(map[string]interface{}); ok {
+			if role, ok := userMap["role"].(string); ok {
+				userRole = role
+			}
+		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"posts": []model.Post{},
+		})
+		return
+	}
+
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	var posts []model.Post
 
@@ -71,6 +133,34 @@ func GetPopularPosts(c *gin.Context) {
 
 // Get latest posts
 func GetLatestPosts(c *gin.Context) {
+	// Get current user role
+	var userRole string
+	if userContext, exists := c.Get("user"); exists {
+		if userMap, ok := userContext.(map[string]interface{}); ok {
+			if role, ok := userMap["role"].(string); ok {
+				userRole = role
+			}
+		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"posts": []model.Post{},
+		})
+		return
+	}
+
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	var posts []model.Post
 
@@ -88,6 +178,34 @@ func GetLatestPosts(c *gin.Context) {
 
 // Get category list
 func GetCategories(c *gin.Context) {
+	// Get current user role
+	var userRole string
+	if userContext, exists := c.Get("user"); exists {
+		if userMap, ok := userContext.(map[string]interface{}); ok {
+			if role, ok := userMap["role"].(string); ok {
+				userRole = role
+			}
+		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"categories": []model.Category{},
+		})
+		return
+	}
+
 	var categories []model.Category
 
 	db.Find(&categories)
@@ -127,6 +245,34 @@ func CreateCategory(c *gin.Context) {
 
 // Get tag list
 func GetTags(c *gin.Context) {
+	// Get current user role
+	var userRole string
+	if userContext, exists := c.Get("user"); exists {
+		if userMap, ok := userContext.(map[string]interface{}); ok {
+			if role, ok := userMap["role"].(string); ok {
+				userRole = role
+			}
+		}
+	}
+
+	// Check if guest viewing is allowed
+	var allowGuestView bool
+	var config model.GeneralSettings
+	if err := db.First(&config).Error; err != nil {
+		// Default to true if config not found
+		allowGuestView = true
+	} else {
+		allowGuestView = config.AllowGuestViewPosts
+	}
+
+	// If not logged in and guest viewing is not allowed, return empty result
+	if userRole == "" && !allowGuestView {
+		c.JSON(http.StatusOK, gin.H{
+			"tags": []model.Tag{},
+		})
+		return
+	}
+
 	var tags []model.Tag
 
 	db.Find(&tags)

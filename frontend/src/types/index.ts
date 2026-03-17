@@ -36,6 +36,7 @@ export interface GeneralSettings {
   id: string;
   captchaEnabled: boolean;      // 是否启用滑块验证
   registrationEnabled: boolean; // 是否允许注册
+  allowGuestViewPosts: boolean; // 是否允许访客浏览文章
   siteName: string;             // 网站名称
   siteDescription: string;      // 网站描述
   itemsPerPage: number;         // 每页显示数量

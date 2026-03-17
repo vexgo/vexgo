@@ -265,6 +265,8 @@ export const zhCN = {
     captchaDesc: "启用滑动拼图验证码，增强安全性",
     registration: "允许注册",
     registrationDesc: "允许新用户注册账号",
+    allowGuestViewPosts: "允许访客浏览文章",
+    allowGuestViewPostsDesc: "开启后，未登录用户可以浏览文章内容",
     saveSettings: "保存设置",
     saving: "保存中...",
     siteNameRequired: "请输入网站名称",
