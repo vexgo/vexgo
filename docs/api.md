@@ -33,6 +33,7 @@ All authenticated requests should include: `Authorization: Bearer <token>`
 Get paginated list of posts with filtering support.
 
 **Query Parameters:**
+
 - `page` (int, default: 1): Page number
 - `limit` (int, default: 10, max: 100): Items per page
 - `category` (string): Filter by category ID
@@ -40,36 +41,46 @@ Get paginated list of posts with filtering support.
 - `search` (string): Search in title and content
 
 **Response:**
+
 ```json
 {
+  "pagination": { "limit": 10, "page": 1, "total": 1, "totalPages": 1 },
   "posts": [
     {
       "id": 1,
-      "title": "Post Title",
-      "content": "Post content...",
-      "status": "published",
+      "title": "tests",
+      "content": "testdvsdf\n# safsf\n",
+      "excerpt": "",
+      "coverImage": "",
+      "viewCount": 5,
+      "authorId": 1,
       "author": {
         "id": 1,
-        "username": "user1",
-        "email": "user@example.com"
+        "username": "admin",
+        "email": "admin@example.com",
+        "role": "super_admin",
+        "email_verified": true,
+        "verification_token": "",
+        "token_expires_at": null,
+        "createdAt": "2026-03-16T22:10:01.484631752+08:00",
+        "profile_visibility": "public"
       },
-      "tags": [
-        {"id": 1, "name": "tag1"}
-      ],
-      "created_at": "2024-01-01T00:00:00Z",
-      "updated_at": "2024-01-01T00:00:00Z"
+      "category": "test1",
+      "tags": [],
+      "status": "published",
+      "rejectionReason": "",
+      "createdAt": "2026-03-17T21:14:35.026603945+08:00",
+      "updatedAt": "2026-03-17T21:14:35.026603945+08:00",
+      "likesCount": 0,
+      "isLiked": false,
+      "commentsCount": 0
     }
-  ],
-  "pagination": {
-    "total": 100,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 10
-  }
+  ]
 }
 ```
 
 **Notes:**
+
 - Guests can only see published posts (if `allow_guest_view_posts` is enabled)
 - Non-admin users can only see published posts from other users
 - Admins can see all posts regardless of status
@@ -81,20 +92,38 @@ Get paginated list of posts with filtering support.
 Get a single post by ID.
 
 **Response:**
+
 ```json
 {
-  "id": 1,
-  "title": "Post Title",
-  "content": "Post content...",
-  "status": "published",
-  "author": {
+  "post": {
     "id": 1,
-    "username": "user1",
-    "email": "user@example.com"
-  },
-  "tags": [...],
-  "created_at": "2024-01-01T00:00:00Z",
-  "updated_at": "2024-01-01T00:00:00Z"
+    "title": "tests",
+    "content": "testdvsdf\n# safsf\n",
+    "excerpt": "",
+    "coverImage": "",
+    "viewCount": 5,
+    "authorId": 1,
+    "author": {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "role": "super_admin",
+      "email_verified": true,
+      "verification_token": "",
+      "token_expires_at": null,
+      "createdAt": "2026-03-16T22:10:01.484631752+08:00",
+      "profile_visibility": "public"
+    },
+    "category": "test1",
+    "tags": [],
+    "status": "published",
+    "rejectionReason": "",
+    "createdAt": "2026-03-17T21:14:35.026603945+08:00",
+    "updatedAt": "2026-03-17T21:14:35.026603945+08:00",
+    "likesCount": 0,
+    "isLiked": false,
+    "commentsCount": 0
+  }
 }
 ```
 
@@ -105,9 +134,11 @@ Get a single post by ID.
 Verify email address using token.
 
 **Query Parameters:**
+
 - `token` (string, required): Verification token
 
 **Response:**
+
 ```json
 {
   "message": "Email verification successful! You can now log in."
@@ -115,6 +146,7 @@ Verify email address using token.
 ```
 
 **For email change:**
+
 ```json
 {
   "message": "Email change successful! Your new email is now active.",
@@ -130,6 +162,7 @@ Verify email address using token.
 Generate a sliding puzzle captcha.
 
 **Response:**
+
 ```json
 {
   "captcha": {
@@ -149,6 +182,7 @@ Generate a sliding puzzle captcha.
 Verify captcha token and position.
 
 **Request:**
+
 ```json
 {
   "captcha_id": "uuid",
@@ -158,6 +192,7 @@ Verify captcha token and position.
 ```
 
 **Response:**
+
 ```json
 {
   "valid": true
@@ -171,6 +206,7 @@ Verify captcha token and position.
 Get all categories.
 
 **Response:**
+
 ```json
 {
   "categories": [
@@ -191,6 +227,7 @@ Get all categories.
 Get all tags.
 
 **Response:**
+
 ```json
 {
   "tags": [
@@ -210,6 +247,7 @@ Get all tags.
 Get site statistics.
 
 **Response:**
+
 ```json
 {
   "stats": {
@@ -229,9 +267,11 @@ Get site statistics.
 Get most popular posts by like count.
 
 **Query Parameters:**
+
 - `limit` (int, default: 5): Number of posts to return
 
 **Response:**
+
 ```json
 {
   "posts": [...]
@@ -245,9 +285,11 @@ Get most popular posts by like count.
 Get latest posts by creation date.
 
 **Query Parameters:**
+
 - `limit` (int, default: 5): Number of posts to return
 
 **Response:**
+
 ```json
 {
   "posts": [...]
@@ -261,6 +303,7 @@ Get latest posts by creation date.
 Get all available themes.
 
 **Response:**
+
 ```json
 {
   "themes": [
@@ -291,6 +334,7 @@ Get preview image for a specific theme.
 Get published comments for a post.
 
 **Response:**
+
 ```json
 {
   "comments": [
@@ -314,6 +358,7 @@ Get published comments for a post.
 Get like status and count for a post.
 
 **Response:**
+
 ```json
 {
   "postId": 1,
@@ -329,10 +374,12 @@ Get like status and count for a post.
 Get posts by a specific user.
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "posts": [...],
@@ -356,6 +403,7 @@ All endpoints under `/api/auth` are for authentication and user management.
 Register a new user account.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -368,6 +416,7 @@ Register a new user account.
 ```
 
 **Response (Success):**
+
 ```json
 {
   "message": "Registration successful! Please check your email to verify your account."
@@ -375,6 +424,7 @@ Register a new user account.
 ```
 
 **Response (Error):**
+
 ```json
 {
   "error": "User already exists"
@@ -382,6 +432,7 @@ Register a new user account.
 ```
 
 **Notes:**
+
 - Registration may be disabled by admin
 - Captcha verification required if enabled
 - Email verification required before login
@@ -393,6 +444,7 @@ Register a new user account.
 Login with email and password.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -404,6 +456,7 @@ Login with email and password.
 ```
 
 **Response (Success):**
+
 ```json
 {
   "token": "jwt_token_here",
@@ -418,6 +471,7 @@ Login with email and password.
 ```
 
 **Response (Error):**
+
 ```json
 {
   "error": "Invalid credentials"
@@ -425,6 +479,7 @@ Login with email and password.
 ```
 
 **Notes:**
+
 - Captcha may be required based on settings
 - Returns JWT token for authenticated requests
 
@@ -435,6 +490,7 @@ Login with email and password.
 Get current user information (requires authentication).
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -459,6 +515,7 @@ Alias for `/auth/me` (requires authentication).
 Update user profile (requires authentication).
 
 **Request:**
+
 ```json
 {
   "username": "new_username",
@@ -468,6 +525,7 @@ Update user profile (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Profile updated successfully"
@@ -481,6 +539,7 @@ Update user profile (requires authentication).
 Change user password (requires authentication).
 
 **Request:**
+
 ```json
 {
   "current_password": "old_password",
@@ -489,6 +548,7 @@ Change user password (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Password changed successfully"
@@ -502,6 +562,7 @@ Change user password (requires authentication).
 Request email change (requires authentication).
 
 **Request:**
+
 ```json
 {
   "new_email": "newemail@example.com",
@@ -510,6 +571,7 @@ Request email change (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Verification email sent to new address"
@@ -523,6 +585,7 @@ Request email change (requires authentication).
 Update user settings (requires authentication).
 
 **Request:**
+
 ```json
 {
   "profile_visibility": "public",
@@ -533,6 +596,7 @@ Update user settings (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Settings updated successfully"
@@ -546,6 +610,7 @@ Update user settings (requires authentication).
 Request password reset email.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com"
@@ -553,6 +618,7 @@ Request password reset email.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "If the email exists, a reset link has been sent"
@@ -566,6 +632,7 @@ Request password reset email.
 Reset password with token.
 
 **Request:**
+
 ```json
 {
   "token": "reset_token",
@@ -574,6 +641,7 @@ Reset password with token.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Password reset successful"
@@ -587,6 +655,7 @@ Reset password with token.
 Get email verification status (requires authentication).
 
 **Response:**
+
 ```json
 {
   "email_verified": true,
@@ -601,6 +670,7 @@ Get email verification status (requires authentication).
 Resend verification email (requires authentication).
 
 **Response:**
+
 ```json
 {
   "message": "Verification email sent"
@@ -616,6 +686,7 @@ Resend verification email (requires authentication).
 Get enabled SSO providers.
 
 **Response:**
+
 ```json
 {
   "providers": [
@@ -642,6 +713,7 @@ Get enabled SSO providers.
 Initiate SSO login (redirects to provider).
 
 **Query Parameters:**
+
 - `method` (string, optional): `sso_get_token` or `get_sso_id`
 
 **Response:** Redirect to SSO provider
@@ -653,6 +725,7 @@ Initiate SSO login (redirects to provider).
 SSO callback endpoint (provider redirects here).
 
 **Query Parameters:**
+
 - `code` (string): Authorization code
 - `state` (string): State parameter for CSRF protection
 - `method` (string): Same as in login request
@@ -668,6 +741,7 @@ SSO callback endpoint (provider redirects here).
 Create a new post (requires authentication).
 
 **Request:**
+
 ```json
 {
   "title": "My Post",
@@ -679,6 +753,7 @@ Create a new post (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -698,10 +773,12 @@ Create a new post (requires authentication).
 Get current user's posts (requires authentication).
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "posts": [...],
@@ -716,10 +793,12 @@ Get current user's posts (requires authentication).
 Get current user's draft posts (requires authentication).
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "posts": [...],
@@ -734,6 +813,7 @@ Get current user's draft posts (requires authentication).
 Update a post (requires authentication, author only).
 
 **Request:**
+
 ```json
 {
   "title": "Updated Title",
@@ -745,6 +825,7 @@ Update a post (requires authentication, author only).
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -762,6 +843,7 @@ Update a post (requires authentication, author only).
 Delete a post (requires authentication, author or admin only).
 
 **Response:**
+
 ```json
 {
   "message": "Post deleted successfully"
@@ -777,6 +859,7 @@ Delete a post (requires authentication, author or admin only).
 Create a comment (requires authentication).
 
 **Request:**
+
 ```json
 {
   "postId": 1,
@@ -786,6 +869,7 @@ Create a comment (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -798,6 +882,7 @@ Create a comment (requires authentication).
 ```
 
 **Notes:**
+
 - Comment content limited to 100 characters
 - `parentId` is optional for reply comments
 
@@ -808,6 +893,7 @@ Create a comment (requires authentication).
 Delete a comment (requires authentication, comment author or admin only).
 
 **Response:**
+
 ```json
 {
   "message": "Comment deleted successfully"
@@ -823,6 +909,7 @@ Delete a comment (requires authentication, comment author or admin only).
 Toggle like on a post (requires authentication).
 
 **Response:**
+
 ```json
 {
   "message": "Liked successfully" | "Like removed",
@@ -841,9 +928,11 @@ Toggle like on a post (requires authentication).
 Upload a single file (requires authentication).
 
 **Form Data:**
+
 - `file` (file): The file to upload
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -855,6 +944,7 @@ Upload a single file (requires authentication).
 ```
 
 **Notes:**
+
 - Supports local storage or S3 (based on configuration)
 - Files are stored with UUID filename to avoid conflicts
 
@@ -865,9 +955,11 @@ Upload a single file (requires authentication).
 Upload multiple files (requires authentication).
 
 **Form Data:**
+
 - `files[]` (files): Multiple files
 
 **Response:**
+
 ```json
 {
   "files": [
@@ -892,10 +984,12 @@ Upload multiple files (requires authentication).
 Get current user's uploaded files (requires authentication).
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "files": [
@@ -918,6 +1012,7 @@ Get current user's uploaded files (requires authentication).
 Delete a file (requires authentication, file owner or admin only).
 
 **Response:**
+
 ```json
 {
   "message": "File deleted successfully"
@@ -937,10 +1032,12 @@ All moderation endpoints require `admin` or `super_admin` role.
 Get pending comments for moderation.
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "comments": [
@@ -975,6 +1072,7 @@ Get rejected comments.
 Approve a comment.
 
 **Response:**
+
 ```json
 {
   "message": "Comment approved"
@@ -988,6 +1086,7 @@ Approve a comment.
 Reject a comment.
 
 **Request:**
+
 ```json
 {
   "rejection_reason": "Reason for rejection"
@@ -995,6 +1094,7 @@ Reject a comment.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Comment rejected"
@@ -1008,6 +1108,7 @@ Reject a comment.
 Get comment moderation configuration.
 
 **Response:**
+
 ```json
 {
   "enabled": true,
@@ -1028,6 +1129,7 @@ Get comment moderation configuration.
 Update comment moderation configuration.
 
 **Request:**
+
 ```json
 {
   "enabled": true,
@@ -1043,6 +1145,7 @@ Update comment moderation configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Configuration updated"
@@ -1058,10 +1161,12 @@ Update comment moderation configuration.
 Get pending posts for moderation.
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "posts": [...],
@@ -1088,6 +1193,7 @@ Get rejected posts.
 Approve a post (status changes to `published`).
 
 **Response:**
+
 ```json
 {
   "message": "Post approved",
@@ -1102,6 +1208,7 @@ Approve a post (status changes to `published`).
 Reject a post.
 
 **Request:**
+
 ```json
 {
   "rejection_reason": "Reason for rejection"
@@ -1109,6 +1216,7 @@ Reject a post.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Post has been rejected",
@@ -1123,6 +1231,7 @@ Reject a post.
 Resubmit a rejected post (status changes back to `pending`).
 
 **Response:**
+
 ```json
 {
   "message": "Post resubmitted for review"
@@ -1140,10 +1249,12 @@ All user management endpoints require `admin` or `super_admin` role.
 Get user list with pagination.
 
 **Query Parameters:**
+
 - `page` (int, default: 1)
 - `limit` (int, default: 10)
 
 **Response:**
+
 ```json
 {
   "users": [
@@ -1167,6 +1278,7 @@ Get user list with pagination.
 Update user role.
 
 **Request:**
+
 ```json
 {
   "role": "admin" | "user" | "super_admin"
@@ -1174,6 +1286,7 @@ Update user role.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "User role updated"
@@ -1181,6 +1294,7 @@ Update user role.
 ```
 
 **Notes:**
+
 - Cannot modify own role
 - Super admin can only be assigned/deassigned by another super admin
 
@@ -1191,6 +1305,7 @@ Update user role.
 Delete a user.
 
 **Response:**
+
 ```json
 {
   "message": "User deleted successfully"
@@ -1198,6 +1313,7 @@ Delete a user.
 ```
 
 **Notes:**
+
 - Cannot delete self
 - Super admin cannot be deleted by non-super admin
 
@@ -1214,6 +1330,7 @@ All configuration endpoints require `admin` or `super_admin` role.
 Get SMTP configuration (password not returned).
 
 **Response:**
+
 ```json
 {
   "enabled": true,
@@ -1232,6 +1349,7 @@ Get SMTP configuration (password not returned).
 Update SMTP configuration.
 
 **Request:**
+
 ```json
 {
   "enabled": true,
@@ -1245,6 +1363,7 @@ Update SMTP configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "SMTP configuration updated"
@@ -1258,6 +1377,7 @@ Update SMTP configuration.
 Test SMTP connection.
 
 **Request:**
+
 ```json
 {
   "test_email": "test@example.com"
@@ -1265,6 +1385,7 @@ Test SMTP connection.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Test email sent successfully"
@@ -1280,6 +1401,7 @@ Test SMTP connection.
 Get AI configuration (API key not returned).
 
 **Response:**
+
 ```json
 {
   "enabled": true,
@@ -1297,6 +1419,7 @@ Get AI configuration (API key not returned).
 Update AI configuration.
 
 **Request:**
+
 ```json
 {
   "enabled": true,
@@ -1308,6 +1431,7 @@ Update AI configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "AI configuration updated"
@@ -1321,6 +1445,7 @@ Update AI configuration.
 Test AI connection.
 
 **Request:**
+
 ```json
 {
   "test_prompt": "Hello, AI!"
@@ -1328,6 +1453,7 @@ Test AI connection.
 ```
 
 **Response:**
+
 ```json
 {
   "response": "Hello! How can I help you today?"
@@ -1341,12 +1467,10 @@ Test AI connection.
 Get available AI models (for configured provider).
 
 **Response:**
+
 ```json
 {
-  "models": [
-    "gpt-3.5-turbo",
-    "gpt-4"
-  ]
+  "models": ["gpt-3.5-turbo", "gpt-4"]
 }
 ```
 
@@ -1359,6 +1483,7 @@ Get available AI models (for configured provider).
 Get general settings (public access).
 
 **Response:**
+
 ```json
 {
   "site_name": "VexGo",
@@ -1377,6 +1502,7 @@ Get general settings (public access).
 Update general settings (admin only).
 
 **Request:**
+
 ```json
 {
   "site_name": "VexGo",
@@ -1389,6 +1515,7 @@ Update general settings (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Settings updated"
@@ -1404,6 +1531,7 @@ Update general settings (admin only).
 Get current theme configuration.
 
 **Response:**
+
 ```json
 {
   "active_theme": "default"
@@ -1417,6 +1545,7 @@ Get current theme configuration.
 Set active theme.
 
 **Request:**
+
 ```json
 {
   "active_theme": "theme_id"
@@ -1424,6 +1553,7 @@ Set active theme.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Theme updated successfully",
@@ -1438,9 +1568,11 @@ Set active theme.
 Upload and install a new theme (admin only).
 
 **Form Data:**
+
 - `theme` (file): ZIP archive containing theme files
 
 **Response:**
+
 ```json
 {
   "message": "Theme uploaded successfully"
@@ -1448,6 +1580,7 @@ Upload and install a new theme (admin only).
 ```
 
 **Theme Structure:**
+
 ```
 theme.zip
 └── theme-id/
@@ -1461,6 +1594,7 @@ theme.zip
 ```
 
 **vexgo-theme.json:**
+
 ```json
 {
   "id": "theme-id",
@@ -1481,6 +1615,7 @@ theme.zip
 Get site statistics (total counts).
 
 **Response:**
+
 ```json
 {
   "stats": {
@@ -1500,9 +1635,11 @@ Get site statistics (total counts).
 Get most popular posts by like count.
 
 **Query Parameters:**
+
 - `limit` (int, default: 5)
 
 **Response:**
+
 ```json
 {
   "posts": [
@@ -1523,9 +1660,11 @@ Get most popular posts by like count.
 Get latest posts by creation date.
 
 **Query Parameters:**
+
 - `limit` (int, default: 5)
 
 **Response:**
+
 ```json
 {
   "posts": [...]
@@ -1541,6 +1680,7 @@ Get latest posts by creation date.
 Create a new category (admin only).
 
 **Request:**
+
 ```json
 {
   "name": "Technology",
@@ -1550,6 +1690,7 @@ Create a new category (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -1566,6 +1707,7 @@ Create a new category (admin only).
 Create a new tag (admin only).
 
 **Request:**
+
 ```json
 {
   "name": "golang",
@@ -1574,6 +1716,7 @@ Create a new tag (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -1591,6 +1734,7 @@ Create a new tag (admin only).
 Generate a sliding puzzle captcha.
 
 **Response:**
+
 ```json
 {
   "captcha": {
@@ -1604,6 +1748,7 @@ Generate a sliding puzzle captcha.
 ```
 
 **Fields:**
+
 - `id`: Captcha ID for verification
 - `token`: Token for verification
 - `background`: Base64 encoded background image with缺口
@@ -1617,6 +1762,7 @@ Generate a sliding puzzle captcha.
 Verify captcha solution.
 
 **Request:**
+
 ```json
 {
   "captcha_id": "uuid",
@@ -1626,6 +1772,7 @@ Verify captcha solution.
 ```
 
 **Response:**
+
 ```json
 {
   "valid": true
@@ -1633,6 +1780,7 @@ Verify captcha solution.
 ```
 
 **Notes:**
+
 - Captcha can only be verified once (marked as used after first verification)
 - Captcha expires after configured time (default 5 minutes)
 - X position verification allows ±5 pixel tolerance
@@ -1644,6 +1792,7 @@ Verify captcha solution.
 All endpoints may return the following error responses:
 
 **400 Bad Request:**
+
 ```json
 {
   "error": "Invalid request parameters"
@@ -1651,6 +1800,7 @@ All endpoints may return the following error responses:
 ```
 
 **401 Unauthorized:**
+
 ```json
 {
   "error": "Unauthorized"
@@ -1658,6 +1808,7 @@ All endpoints may return the following error responses:
 ```
 
 **403 Forbidden:**
+
 ```json
 {
   "error": "Insufficient permissions"
@@ -1665,6 +1816,7 @@ All endpoints may return the following error responses:
 ```
 
 **404 Not Found:**
+
 ```json
 {
   "error": "Resource not found"
@@ -1672,6 +1824,7 @@ All endpoints may return the following error responses:
 ```
 
 **409 Conflict:**
+
 ```json
 {
   "error": "Resource already exists"
@@ -1679,6 +1832,7 @@ All endpoints may return the following error responses:
 ```
 
 **500 Internal Server Error:**
+
 ```json
 {
   "error": "Internal server error"
@@ -1714,18 +1868,21 @@ All paginated endpoints accept `page` and `limit` query parameters and return:
 ## Data Types
 
 ### User Role Types
+
 - `user`: Regular user
 - `admin`: Administrator
 - `super_admin`: Super administrator (highest privilege)
 - `guest`: Guest user (limited access)
 
 ### Post Status
+
 - `draft`: Draft (only visible to author)
 - `pending`: Pending moderation
 - `published`: Published and visible
 - `rejected`: Rejected by moderator
 
 ### Comment Status
+
 - `published`: Approved and visible
 - `pending`: Pending moderation (if AI moderation enabled)
 - `rejected`: Rejected by moderator
