@@ -596,6 +596,21 @@ export const zhCN = {
     popupBlocked: "弹出窗口被拦截，请允许本站弹出窗口后重试",
   },
 
+  // 滑块验证
+  sliderCaptcha: {
+    title: "安全验证",
+    closeButton: "关闭",
+    closeButtonDisabled: "请先完成验证",
+    error: "验证失败，请重试",
+    success: "验证成功",
+    successHint: "验证成功，请点击右上角关闭",
+    backgroundAlt: "验证码背景",
+    puzzleAlt: "拼图块",
+    dragHint: "向右拖动滑块完成验证",
+    refreshButton: "刷新验证码",
+    refreshing: "刷新中...",
+  },
+
   // 注册页面扩展
   registerPage: {
     createAccount: "创建账号",

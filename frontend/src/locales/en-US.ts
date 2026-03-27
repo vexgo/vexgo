@@ -596,6 +596,21 @@ export const enUS = {
     popupBlocked: "Popup blocked. Please allow popups for this site.",
   },
 
+  // Slider Captcha
+  sliderCaptcha: {
+    title: "Security Verification",
+    closeButton: "Close",
+    closeButtonDisabled: "Please complete verification first",
+    error: "Verification failed, please try again",
+    success: "Verification successful",
+    successHint: "Verification successful, please click the close button",
+    backgroundAlt: "Captcha background",
+    puzzleAlt: "Puzzle piece",
+    dragHint: "Drag the slider to complete verification",
+    refreshButton: "Refresh captcha",
+    refreshing: "Refreshing...",
+  },
+
   // Register Page Extended
   registerPage: {
     createAccount: "Create Account",

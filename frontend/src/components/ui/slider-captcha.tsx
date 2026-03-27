@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './button';
 import { RefreshCw, CheckCircle, X } from 'lucide-react';
+import { useTranslation } from '@/lib/I18nContext';
 
 interface SliderCaptchaProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface SliderCaptchaProps {
 }
 
 export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps) {
+  const { t } = useTranslation();
   const [captchaData, setCaptchaData] = useState<{
     id: string;
     token: string;
@@ -229,7 +231,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">安全验证</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t("sliderCaptcha.title")}</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -240,7 +242,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
             }}
             disabled={!canClose}
             className="h-8 w-8 p-0"
-            title={canClose ? "关闭" : "请先完成验证"}
+            title={canClose ? t("sliderCaptcha.closeButton") : t("sliderCaptcha.closeButtonDisabled")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -248,14 +250,14 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
 
         {error && !isVerified && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-            {error}
+            {t("sliderCaptcha.error")}
           </div>
         )}
 
         {isVerified && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-600 flex items-center">
             <CheckCircle className="h-4 w-4 mr-2" />
-            验证成功
+            {t("sliderCaptcha.successHint")}
           </div>
         )}
 
@@ -267,7 +269,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
               <div className="relative" style={{ width: '320px', height: '160px' }}>
                 <img
                   src={captchaData.bg_image}
-                  alt="验证码背景"
+                  alt={t("sliderCaptcha.backgroundAlt")}
                   className="w-full h-full"
                 />
                 
@@ -284,7 +286,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
                 >
                   <img
                     src={captchaData.puzzle_img}
-                    alt="拼图块"
+                    alt={t("sliderCaptcha.puzzleAlt")}
                     className="h-15 w-15"
                     style={{ width: '60px', height: '60px' }}
                   />
@@ -324,9 +326,9 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
             {/* 提示文字 */}
             <div className="text-center text-sm text-gray-600">
               {isVerified ? (
-                <span className="text-green-600 font-medium">验证成功，请点击右上角关闭</span>
+                <span className="text-green-600 font-medium">{t("sliderCaptcha.successHint")}</span>
               ) : (
-                '向右拖动滑块完成验证'
+                t("sliderCaptcha.dragHint")
               )}
             </div>
 
@@ -340,7 +342,7 @@ export function SliderCaptcha({ isOpen, onClose, onSuccess }: SliderCaptchaProps
                 className="text-sm"
               >
                 <RefreshCw className={`h-4 w-4 mr-1 ${isVerifying ? 'animate-spin' : ''}`} />
-                刷新验证码
+                {t("sliderCaptcha.refreshButton")}
               </Button>
             </div>
           </div>

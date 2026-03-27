@@ -441,7 +441,7 @@ export function RegisterPage() {
                         onClick={resetCaptcha}
                         className="text-xs h-7"
                       >
-                        重新验证
+                        {t("auth.resetPassword")}
                       </Button>
                     </div>
                   ) : (
