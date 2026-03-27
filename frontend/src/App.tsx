@@ -24,6 +24,7 @@ import { CommentModerationPage } from '@/pages/CommentModerationPage';
 import { CommentConfigPage } from '@/pages/CommentConfigPage';
 import { AISettingsPage } from '@/pages/AISettingsPage';
 import { MessageCenterPage } from '@/pages/MessageCenterPage';
+import { CreatorApplicationReviewPage } from '@/pages/CreatorApplicationReviewPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useEffect } from 'react';
 
@@ -185,6 +186,14 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <ThemePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator-applications"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <CreatorApplicationReviewPage />
                 </ProtectedRoute>
               }
             />

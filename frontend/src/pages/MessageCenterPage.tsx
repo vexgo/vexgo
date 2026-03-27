@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { messagesApi } from '@/lib/api';
 import { useTranslation } from '@/lib/I18nContext';
+import { CreatorApplicationButton } from '@/components/CreatorApplicationButton';
 
 import {
   Bell,
@@ -19,6 +21,7 @@ import {
   ArrowRight,
   Trash2,
   Eye,
+  Users,
 } from 'lucide-react';
 
 // 消息类型
@@ -42,6 +45,7 @@ type Message = {
 
 export function MessageCenterPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   
@@ -49,6 +53,11 @@ export function MessageCenterPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   
   const [loading, setLoading] = useState(false);
+
+  // 检查是否是管理员
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  // 检查是否是访客
+  const isGuest = user?.role === 'guest';
 
   // 从API获取消息数据
   useEffect(() => {
@@ -167,9 +176,24 @@ export function MessageCenterPage() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">{t('messageCenter.title')}</h1>
-        <Button variant="outline" size="sm" onClick={markAllAsRead}>
-          {t('messageCenter.markAllAsRead')}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isGuest && (
+            <CreatorApplicationButton />
+          )}
+          {isAdmin && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/creator-applications')}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              {t('creatorApplication.reviewApplications')}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={markAllAsRead}>
+            {t('messageCenter.markAllAsRead')}
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

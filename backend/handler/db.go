@@ -167,6 +167,7 @@ func InitDB(cfg *cmd.Config, dataDir string) {
 		&model.ThemeConfig{},
 		&model.Message{},
 		&model.Notification{},
+		&model.CreatorApplication{},
 	); err != nil {
 		logrus.Fatalf("auto migrate failed: %v", err)
 	}

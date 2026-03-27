@@ -113,6 +113,11 @@ func RegisterAPIRoutes(r *gin.Engine) {
 		api.PUT("/users/:id/role", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), UpdateUserRole)
 		api.DELETE("/users/:id", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), DeleteUser)
 
+		// Creator application routes
+		api.POST("/users/apply-creator", middleware.JWTAuth(), ApplyForCreator)
+		api.GET("/users/creator-applications", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), GetCreatorApplications)
+		api.PUT("/users/creator-applications/:id/review", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), ReviewCreatorApplication)
+
 		api.GET("/config/smtp", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), GetSMTPConfig)
 		api.PUT("/config/smtp", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), UpdateSMTPConfig)
 		api.POST("/config/smtp/test", middleware.JWTAuth(), middleware.PermissionMiddleware("admin", "super_admin"), TestSMTP)
