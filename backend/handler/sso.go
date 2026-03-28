@@ -516,6 +516,9 @@ func findOrCreateUser(db *gorm.DB, provider string, info *ssoUserInfo) (*model.U
 		if err := db.First(&user, binding.UserID).Error; err != nil {
 			return nil, errors.New("user account not found")
 		}
+		// Update last login time
+		user.LastLoginAt = time.Now()
+		db.Save(&user)
 		return &user, nil
 	}
 
@@ -523,6 +526,11 @@ func findOrCreateUser(db *gorm.DB, provider string, info *ssoUserInfo) (*model.U
 	var user model.User
 	if info.email != "" {
 		db.Where("email = ?", info.email).First(&user)
+		if user.ID != 0 {
+			// Update last login time
+			user.LastLoginAt = time.Now()
+			db.Save(&user)
+		}
 	}
 
 	// 3. Auto-register new user
@@ -564,6 +572,8 @@ func issueJWT(user *model.User) (string, error) {
 		"role":             user.Role,
 		"password_version": user.PasswordVersion,
 		"exp":              time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"iat":              time.Now().Unix(),
+		"jti":              fmt.Sprintf("%d-%s", user.ID, time.Now().Format(time.RFC3339Nano)),
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(config.JWTSecret)
 }
