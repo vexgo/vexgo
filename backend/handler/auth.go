@@ -189,6 +189,13 @@ func Login(c *gin.Context) {
 		"jti":              fmt.Sprintf("%d-%s", user.ID, time.Now().Format(time.RFC3339Nano)), // Unique identifier
 	}
 
+	// Update last login time to invalidate old tokens
+	user.LastLoginAt = time.Now()
+	if err := db.Save(&user).Error; err != nil {
+		logrus.WithError(err).Warn("Failed to update last login time")
+		// Don't fail the login, just log
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(config.JWTSecret)
 	if err != nil {
