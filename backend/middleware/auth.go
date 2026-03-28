@@ -63,6 +63,13 @@ func JWTAuth() gin.HandlerFunc {
 						return
 					}
 				}
+				// Check if token was issued before last login to prevent token reuse
+				if tokenIat, ok := claims["iat"].(float64); ok {
+					if int64(tokenIat) < user.LastLoginAt.Unix() {
+						c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token is invalid, please log in again"})
+						return
+					}
+				}
 				dbRole = user.Role
 			}
 		}
@@ -134,6 +141,12 @@ func OptionalJWTAuth() gin.HandlerFunc {
 					// Check if password version in token matches current user's password version
 					if tokenPasswordVersion, ok := claims["password_version"].(float64); ok {
 						if int(tokenPasswordVersion) != user.PasswordVersion {
+							validToken = false
+						}
+					}
+					// Check if token was issued before last login to prevent token reuse
+					if tokenIat, ok := claims["iat"].(float64); ok {
+						if int64(tokenIat) < user.LastLoginAt.Unix() {
 							validToken = false
 						}
 					}
