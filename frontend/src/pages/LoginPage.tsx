@@ -266,6 +266,9 @@ export function LoginPage() {
       );
       if (error.response?.data?.email_verified === false)
         setEmailVerified(false);
+      if (captchaEnabled) {
+        resetCaptcha();
+      }
     } finally {
       setLoading(false);
     }
