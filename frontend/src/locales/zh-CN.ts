@@ -24,6 +24,9 @@ export const zhCN = {
     siteName: "VexGo",
     show: "显示",
     hide: "隐藏",
+    accessDenied: "访问被拒绝",
+    insufficientPermissions: "权限不足",
+    processing: "处理中...",
   },
 
   // 认证相关

@@ -101,7 +101,7 @@ export function CreatorApplicationButton({ className }: CreatorApplicationButton
             </Button>
             <Button onClick={openConfirmation} disabled={isLoading}>
               <Send className="w-4 h-4 mr-2" />
-              {isLoading ? t('common.submitting') : t('creatorApplication.submit')}
+              {isLoading ? t('creatorApplication.submitting') : t('creatorApplication.submit')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -118,7 +118,7 @@ export function CreatorApplicationButton({ className }: CreatorApplicationButton
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleApply} disabled={isLoading}>
-              {isLoading ? t('common.submitting') : t('creatorApplication.confirm')}
+              {isLoading ? t('creatorApplication.submitting') : t('creatorApplication.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
