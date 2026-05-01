@@ -1,0 +1,7 @@
+{
+    "name": "minimal",
+    "version": "1.0.0",
+    "author": "Go CMS",
+    "description": "Minimalist theme for Go CMS",
+    "templates": ["home", "post", "page", "archive"]
+}

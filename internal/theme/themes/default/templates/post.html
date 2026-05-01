@@ -1,0 +1,18 @@
+{{define "post.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+    <link rel="stylesheet" href="/themes/{{.ThemeName}}/static/style.css">
+</head>
+<body>
+    <article class="post">
+        <h1>{{.Content.Title}}</h1>
+        <div class="content">{{.Content.Content}}</div>
+    </article>
+</body>
+</html>
+{{end}}

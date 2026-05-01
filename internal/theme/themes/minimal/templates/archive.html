@@ -1,0 +1,25 @@
+{{define "archive.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+</head>
+<body style="font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <h1>Archive</h1>
+    <h2>Posts</h2>
+    <ul>
+    {{range .Content.Posts}}
+    <li><a href="/posts/{{.Slug}}">{{.Title}}</a></li>
+    {{end}}
+    </ul>
+    <h2>Pages</h2>
+    <ul>
+    {{range .Content.Pages}}
+    <li><a href="/pages/{{.Slug}}">{{.Title}}</a></li>
+    {{end}}
+    </ul>
+</body>
+</html>
+{{end}}

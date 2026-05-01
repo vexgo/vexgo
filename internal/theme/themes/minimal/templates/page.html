@@ -1,0 +1,16 @@
+{{define "page.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+</head>
+<body style="font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <div>
+        <h1>{{.Content.Title}}</h1>
+        <div>{{.Content.Content}}</div>
+    </div>
+</body>
+</html>
+{{end}}

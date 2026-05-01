@@ -1,0 +1,7 @@
+{
+    "name": "default",
+    "version": "1.0.0",
+    "author": "Go CMS",
+    "description": "Default Go CMS theme",
+    "templates": ["base", "home", "post", "page", "archive"]
+}

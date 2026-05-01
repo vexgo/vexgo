@@ -1,0 +1,18 @@
+{{define "page.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+    <link rel="stylesheet" href="/themes/{{.ThemeName}}/static/style.css">
+</head>
+<body>
+    <div class="page">
+        <h1>{{.Content.Title}}</h1>
+        <div class="content">{{.Content.Content}}</div>
+    </div>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,23 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+    <link rel="stylesheet" href="/themes/{{.ThemeName}}/static/style.css">
+</head>
+<body>
+    <div class="home">
+        <h1>Welcome to {{.SiteName}}</h1>
+        {{range .Content}}
+        <article>
+            <h2><a href="/posts/{{.Slug}}">{{.Title}}</a></h2>
+            <p>{{.Excerpt}}</p>
+        </article>
+        {{end}}
+    </div>
+</body>
+</html>
+{{end}}

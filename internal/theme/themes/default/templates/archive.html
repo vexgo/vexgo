@@ -1,0 +1,33 @@
+{{define "archive.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.MetaTitle | default .SiteName}}</title>
+    {{MetaTags .MetaTitle .MetaDescription .OGImage .CanonicalURL}}
+    <link rel="stylesheet" href="/themes/{{.ThemeName}}/static/style.css">
+</head>
+<body>
+    <div class="archive">
+        <h1>Archive</h1>
+        <section>
+            <h2>Posts</h2>
+            <ul>
+            {{range .Content.Posts}}
+                <li><a href="/posts/{{.Slug}}">{{.Title}}</a> — {{.CreatedAt.Format "2006-01-02"}}</li>
+            {{end}}
+            </ul>
+        </section>
+        <section>
+            <h2>Pages</h2>
+            <ul>
+            {{range .Content.Pages}}
+                <li><a href="/pages/{{.Slug}}">{{.Title}}</a></li>
+            {{end}}
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
+{{end}}
